@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: JournalAI2
+  threads:
+    virtual:
+      enabled: true
+  data:
+    mongodb:
+      uri: "mongodb://localhost:27017/journalDb"
+
+security:
+  allowedOrigins: "*"
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  expiration: 86400000
+
