@@ -4,10 +4,10 @@ import com.ahnis.journalai.util.EnumUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum Language {
-    ENGLISH, HINDI;
+    ENGLISH, HINDI, PUNJABI, GERMAN, FRENCH, RUSSIAN;
 
     @JsonCreator
     public static Language fromString(String value) {
-        return EnumUtils.fromString(Language.class,value);
+        return EnumUtils.fromString(Language.class, value);
     }
 }

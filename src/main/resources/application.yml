@@ -10,6 +10,27 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-3-small
+      chat:
+
+        options:
+          model: gpt-4-turbo
+#    vectorstore:
+#      milvus:
+#        client:
+#          host: "localhost"
+#          port: 19530
+#          username: "root"
+#          password: "milvus"
+#        databaseName: "default"
+#        collectionName: "vector_store"
+#        embeddingDimension: 1536
+#        indexType: IVF_FLAT
+#        metricType: COSINE
+#        initialize-schema: true
+
 security:
   allowedOrigins: "*"
 
@@ -17,3 +38,8 @@ jwt:
   secret: ${JWT_SECRET_KEY}
   expiration: 86400000
 
+ahnis:
+  aiapp:
+    vectorStorePath: ./vectorstore.json
+    documentsToLoad:
+      - classpath:/therapist.txt

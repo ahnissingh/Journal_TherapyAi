@@ -13,6 +13,7 @@ public final class EnumUtils {
         try {
             return Enum.valueOf(enumType, value.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
+            //Throwing Exception with better message
             throw new IllegalArgumentException(
                     "Invalid value for enum '" + enumType.getSimpleName() + "': '" + value + "'. Expected one of: " +
                             Arrays.toString(enumType.getEnumConstants())
