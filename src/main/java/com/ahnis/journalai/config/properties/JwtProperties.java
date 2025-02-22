@@ -1,4 +1,4 @@
-package com.ahnis.journalai.config;
+package com.ahnis.journalai.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
+//todo refactor to records
 @Component
 @ConfigurationProperties(prefix = "jwt")
 @Getter

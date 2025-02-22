@@ -1,20 +1,28 @@
 package com.ahnis.journalai.dto;
 
 
-import com.ahnis.journalai.enums.Language;
-import com.ahnis.journalai.enums.ThemePreference;
-import com.ahnis.journalai.enums.TherapistType;
-import com.ahnis.journalai.enums.TherapyFrequency;
+import com.ahnis.journalai.enums.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record PreferencesDTO(
+
         @NotNull(message = "Therapy Frequency is required")
         TherapyFrequency therapyFrequency,
         @NotNull(message = "Language is required")
         Language language,
-        @NotNull
+        @NotNull(message = "Theme preference is required")
         ThemePreference themePreference,
-        @NotNull
-        TherapistType therapistType
+        @NotNull(message = "Therapist type is required")
+        TherapistType therapistType,
+        @Positive(message = "Age must be positive")
+        @Min(value = 5, message = "Age must be at least ")
+        @Max(value = 120, message = "Age must be less than or equal to 120")
+        Integer age,
+        @NotNull(message = "Gender is required")
+        Gender gender
 ) {
+
 }

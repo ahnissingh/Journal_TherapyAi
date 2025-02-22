@@ -1,3 +1,4 @@
+
 package com.ahnis.journalai.service;
 
 import com.ahnis.journalai.repository.UserRepository;
@@ -15,8 +16,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsernameOrEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found" + username));
-    }
 
+        return userRepository.findByUsernameOrEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+    }
 }

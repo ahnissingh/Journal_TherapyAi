@@ -1,5 +1,6 @@
 package com.ahnis.journalai.config;
 
+import com.ahnis.journalai.config.properties.SecurityProperties;
 import com.ahnis.journalai.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +38,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/chatbot/**").authenticated()
+                        .requestMatchers("/api/chatbot/**").permitAll()
+//                        .requestMatchers("/api/journals/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

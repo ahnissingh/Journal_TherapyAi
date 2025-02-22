@@ -1,16 +1,11 @@
 package com.ahnis.journalai.mapper;
 
-// UserMapper.java
-
 import com.ahnis.journalai.dto.PreferencesDTO;
 import com.ahnis.journalai.dto.UserRegistrationDTO;
 import com.ahnis.journalai.dto.UserResponseDTO;
 import com.ahnis.journalai.entity.Preferences;
 import com.ahnis.journalai.entity.User;
-import com.ahnis.journalai.enums.Language;
-import com.ahnis.journalai.enums.ThemePreference;
-import com.ahnis.journalai.enums.TherapistType;
-import com.ahnis.journalai.enums.TherapyFrequency;
+import com.ahnis.journalai.enums.*;
 
 public class UserMapper {
 
@@ -29,6 +24,8 @@ public class UserMapper {
                 .language(Language.valueOf(dto.language().name()))
                 .themePreference(ThemePreference.valueOf(dto.themePreference().name()))
                 .therapistType(TherapistType.valueOf(dto.therapistType().name()))
+                .age(dto.age())
+                .gender(dto.gender())
                 .build();
     }
 
@@ -37,7 +34,9 @@ public class UserMapper {
                 TherapyFrequency.valueOf(preferences.getTherapyFrequency().name()),
                 Language.valueOf(preferences.getLanguage().name()),
                 ThemePreference.valueOf(preferences.getThemePreference().name()),
-                TherapistType.valueOf(preferences.getTherapistType().name())
+                TherapistType.valueOf(preferences.getTherapistType().name()),
+                preferences.getAge(),
+                Gender.valueOf(preferences.getGender().name())
         );
     }
 

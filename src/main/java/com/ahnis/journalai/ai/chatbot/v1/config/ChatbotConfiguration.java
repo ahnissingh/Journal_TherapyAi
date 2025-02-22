@@ -1,14 +1,14 @@
-package com.ahnis.journalai.ai.chatbot.config;
+package com.ahnis.journalai.ai.chatbot.v1.config;
 
+import com.ahnis.journalai.ai.chatbot.v1.service.UserAwareInMemoryChatMemory;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ChatConfig {
+public class ChatbotConfiguration {
     @Bean
     public ChatMemory chatMemory() {
-        return new InMemoryChatMemory();
+        return new UserAwareInMemoryChatMemory();
     }
 }

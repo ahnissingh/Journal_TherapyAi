@@ -19,32 +19,32 @@ public class JournalServiceImpl implements JournalService {
     private final JournalMapper journalMapper;
 
     @Override
-    public JournalResponseDTO createJournal(JournalRequestDTO dto, User user) {
-        Journal journal = journalMapper.toEntity(dto, user);
+    public JournalResponseDTO createJournal(JournalRequestDTO dto, String userId) {
+        Journal journal = journalMapper.toEntity(dto, userId);
         return journalMapper.toDto(journalRepository.save(journal));
     }
 
     @Override
-    public List<JournalResponseDTO> getAllJournals(User user) {
-        return journalRepository.findByUser_Id(user.getId())
+    public List<JournalResponseDTO> getAllJournals(String userId) {
+        return journalRepository.findByUserId(userId)
                 .stream()
                 .map(journalMapper::toDto)
                 .toList();
     }
 
     @Override
-    public JournalResponseDTO getJournalById(String id, User user) {
+    public JournalResponseDTO getJournalById(String id, String userId) {
         Journal journal = journalRepository.findById(id)
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
-        validateJournalOwnership(journal, user);
+        validateJournalOwnership(journal, userId);
         return journalMapper.toDto(journal);
     }
 
     @Override
-    public JournalResponseDTO updateJournal(String id, JournalRequestDTO dto, User user) {
+    public JournalResponseDTO updateJournal(String id, JournalRequestDTO dto, String userId) {
         Journal journal = journalRepository.findById(id)
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
-        validateJournalOwnership(journal, user);
+        validateJournalOwnership(journal, userId);
 
         journal.setTitle(dto.title());
         journal.setContent(dto.content());
@@ -52,15 +52,15 @@ public class JournalServiceImpl implements JournalService {
     }
 
     @Override
-    public void deleteJournal(String id, User user) {
+    public void deleteJournal(String id, String userId) {
         Journal journal = journalRepository.findById(id)
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
-        validateJournalOwnership(journal, user);
+        validateJournalOwnership(journal, userId);
         journalRepository.delete(journal);
     }
 
-    private void validateJournalOwnership(Journal journal, User user) {
-        if (!journal.getUser().getId().equals(user.getId())) {
+    private void validateJournalOwnership(Journal journal, String userId) {
+        if (!journal.getUserId().equals(userId)) {
             throw new JournalNotFoundException("Journal not found");
         }
     }

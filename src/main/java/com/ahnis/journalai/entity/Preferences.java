@@ -1,10 +1,7 @@
 // Preferences.java
 package com.ahnis.journalai.entity;
 
-import com.ahnis.journalai.enums.Language;
-import com.ahnis.journalai.enums.ThemePreference;
-import com.ahnis.journalai.enums.TherapistType;
-import com.ahnis.journalai.enums.TherapyFrequency;
+import com.ahnis.journalai.enums.*;
 import lombok.*;
 
 @Builder
@@ -20,5 +17,7 @@ public class Preferences {
     private Language language;
     private ThemePreference themePreference;
     private TherapistType therapistType;
+    private Integer age;
+    private Gender gender;
 
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,12 +40,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User deleted successfully", null)); // Response with NO_CONTENT status
     }
 
-    //    @PreAuthorize("hasRole('ADMIN')") //issue with preAuthorize using basic if statement
+    @PreAuthorize("hasRole('ADMIN')") //issue with preAuthorize using basic if statement
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAllUsers() {
         userService.getCurrentUser().roles().forEach(role -> log.warn(String.valueOf(role)));
-        if (!userService.getCurrentUser().roles().contains(Role.ADMIN))
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.FORBIDDEN, "You must be ADMIN to get all users", null));
+//        if (!userService.getCurrentUser().roles().contains(Role.ADMIN))
+//            return ResponseEntity.ok(ApiResponse.success(HttpStatus.FORBIDDEN, "You must be ADMIN to get all users", null));
         List<UserResponseDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success(users)); //todo return 403 forbidden
     }

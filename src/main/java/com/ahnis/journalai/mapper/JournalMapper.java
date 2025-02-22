@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 
 @Component
 public class JournalMapper {
-    public Journal toEntity(JournalRequestDTO dto, User user) {
+    public Journal toEntity(JournalRequestDTO dto, String userId) {
         return Journal.builder()
                 .title(dto.title())
                 .content(dto.content())
-                .user(user)
+                .userId(userId)
                 .build();
     }
 
@@ -25,7 +25,7 @@ public class JournalMapper {
                 journal.getContent(),
                 journal.getCreatedAt(),
                 journal.getModifiedAt(),
-                journal.getUser().getId()
+                journal.getUserId()
         );
     }
 }

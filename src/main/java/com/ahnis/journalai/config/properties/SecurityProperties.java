@@ -1,4 +1,4 @@
-package com.ahnis.journalai.config;
+package com.ahnis.journalai.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+//todo refactor to records
 @Component
 @ConfigurationProperties(prefix = "security")
 @Getter

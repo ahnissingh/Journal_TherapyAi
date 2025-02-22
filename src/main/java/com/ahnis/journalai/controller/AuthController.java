@@ -30,17 +30,15 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request, HttpServletRequest servletRequest) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.usernameOrEmail(),
                         request.password()
                 )
         );
-        User user = (User) authentication.getPrincipal();
-        //todo remove after testing
+        var user = (User) authentication.getPrincipal();
 
-        logAuthDetails(request.usernameOrEmail(), servletRequest);
 
         return ResponseEntity.ok(buildAuthResponse(user));
     }

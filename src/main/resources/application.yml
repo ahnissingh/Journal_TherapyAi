@@ -6,7 +6,13 @@ spring:
       enabled: true
   data:
     mongodb:
-      uri: "mongodb://localhost:27017/journalDb"
+      authentication-database: admin
+      database: journal_ai
+      username: ${MONGO_DB_USERNAME}
+      password: ${MONGO_DB_PASSWORD}
+      host: journal-mongodb  #Change to env
+      port: 27017 #change to env
+
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -37,6 +43,22 @@ security:
 jwt:
   secret: ${JWT_SECRET_KEY}
   expiration: 86400000
+
+#todo remove defaults and setup environmental variables
+#todo move this to dev config not in prod i will have this
+admin:
+  user:
+    enabled: ${ADMIN_ENABLED:true}  # Default false for safety
+    username: ${ADMIN_USERNAME:admin}
+    email: ${ADMIN_EMAIL:admin@example.com}
+    password: ${ADMIN_PASSWORD:admin123}  # Set via env var in production
+    preferences:
+      therapyFrequency: BIWEEKLY  # Enum value
+      language: ENGLISH          # Enum value
+      themePreference: DARK      # Enum value
+      therapistType: MINDFUL     # Enum value
+      age: 22                    # Integer value
+      gender: MALE               # Enum value
 
 ahnis:
   aiapp:

@@ -27,7 +27,7 @@ public class Journal {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime modifiedAt;
-    @DBRef
-    private User user;
+
+    private String userId;
 
 }

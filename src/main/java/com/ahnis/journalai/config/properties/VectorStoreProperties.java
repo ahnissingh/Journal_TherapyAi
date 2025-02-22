@@ -1,4 +1,4 @@
-package com.ahnis.journalai.config;
+package com.ahnis.journalai.config.properties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource;
 
 import java.util.List;
 
+//todo refactor to records
 @Setter
 @Getter
 @Configuration

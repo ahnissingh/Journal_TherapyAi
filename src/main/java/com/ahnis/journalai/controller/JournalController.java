@@ -25,7 +25,7 @@ public class JournalController {
             @RequestBody JournalRequestDTO dto,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO response = journalService.createJournal(dto, user);
+        JournalResponseDTO response = journalService.createJournal(dto, user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED, "Journal created successfully", response));
     }
 
@@ -33,7 +33,7 @@ public class JournalController {
     public ResponseEntity<ApiResponse<List<JournalResponseDTO>>> getAllJournals(
             @AuthenticationPrincipal User user
     ) {
-        List<JournalResponseDTO> journals = journalService.getAllJournals(user);
+        List<JournalResponseDTO> journals = journalService.getAllJournals(user.getId());
         return ResponseEntity.ok(ApiResponse.success(journals));
     }
 
@@ -42,7 +42,7 @@ public class JournalController {
             @PathVariable String id,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO journal = journalService.getJournalById(id, user);
+        JournalResponseDTO journal = journalService.getJournalById(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(journal));
     }
 
@@ -52,8 +52,8 @@ public class JournalController {
             @RequestBody JournalRequestDTO dto,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO updatedJournal = journalService.updateJournal(id, dto, user);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.ACCEPTED,"Journal updated successfully", updatedJournal));
+        JournalResponseDTO updatedJournal = journalService.updateJournal(id, dto, user.getId());
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.ACCEPTED, "Journal updated successfully", updatedJournal));
     }
 
     @DeleteMapping("/{id}")
@@ -61,7 +61,7 @@ public class JournalController {
             @PathVariable String id,
             @AuthenticationPrincipal User user
     ) {
-        journalService.deleteJournal(id, user);
+        journalService.deleteJournal(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.NO_CONTENT, "Journal deleted successfully", null));
     }
 }
