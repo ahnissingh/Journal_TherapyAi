@@ -28,13 +28,13 @@ public class ChatBotController {
         return chatService.chat(user.getPreferences(), chatRequest, user.getId());
     }
 
-    @PostMapping(value = "/stream", produces = MediaType.APPLICATION_NDJSON_VALUE)
-    public Flux<String> chatStreamResponseFlux(
-            @RequestBody ChatRequest chatRequest,
-            @AuthenticationPrincipal User user
-    ) {
-        return chatService.chat_stream(user.getPreferences(), chatRequest, user.getId());
-    }
+//    @PostMapping(value = "/stream", produces = MediaType.APPLICATION_NDJSON_VALUE)
+//    public Flux<String> chatStreamResponseFlux(
+//            @RequestBody ChatRequest chatRequest,
+//            @AuthenticationPrincipal User user
+//    ) {
+//        return chatService.chat_stream(user.getPreferences(), chatRequest, user.getId());
+//    }
 
 
 }

@@ -1,11 +1,14 @@
 package com.ahnis.journalai;
 
+import org.springframework.ai.autoconfigure.vectorstore.cassandra.CassandraVectorStoreAutoConfiguration;
+import org.springframework.ai.vectorstore.cassandra.CassandraVectorStore;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {CassandraVectorStoreAutoConfiguration.class})
 @EnableMongoAuditing
 
 @ConfigurationPropertiesScan("com.ahnis.journalai.config.properties")

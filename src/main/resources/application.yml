@@ -23,6 +23,13 @@ spring:
 
         options:
           model: gpt-4-turbo
+
+  cassandra:
+    contact-points: localhost:9042
+    keyspace-name: chat_history
+    local-datacenter: datacenter1
+    username: admin
+    password: admin
 #    vectorstore:
 #      milvus:
 #        client:

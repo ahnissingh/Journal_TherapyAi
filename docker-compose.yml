@@ -24,6 +24,19 @@ services:
           cpus: '0.25'
         reservations:
           memory: 128M
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-container
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_USER=admin
+      - CASSANDRA_PASSWORD=admin
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+
+
 
 volumes:
   mongo-data:
+  cassandra-data:
