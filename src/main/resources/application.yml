@@ -1,5 +1,6 @@
 spring:
   application:
+
     name: JournalAI2
   threads:
     virtual:
@@ -13,36 +14,39 @@ spring:
       host: journal-mongodb  #Change to env
       port: 27017 #change to env
 
+  cassandra:
+    contact-points: localhost:9042
+    keyspace-name: my_keyspace
+    local-datacenter: datacenter1
+    username: admin
+    password: admin
+    schema-action: create_if_not_exists
   ai:
+    vectorstore:
+      milvus:
+        client:
+          host: "localhost"
+          port: 19530
+          username: "root"
+          password: "milvus"
+        databaseName: "journal_ai"
+        collectionName: "vector_store"
+        embeddingDimension: 1536
+        indexType: IVF_FLAT
+        metricType: COSINE
+        initialize-schema: true
     openai:
       api-key: ${OPENAI_API_KEY}
       embedding:
         options:
           model: text-embedding-3-small
       chat:
-
         options:
           model: gpt-4-turbo
 
-  cassandra:
-    contact-points: localhost:9042
-    keyspace-name: chat_history
-    local-datacenter: datacenter1
-    username: admin
-    password: admin
-#    vectorstore:
-#      milvus:
-#        client:
-#          host: "localhost"
-#          port: 19530
-#          username: "root"
-#          password: "milvus"
-#        databaseName: "default"
-#        collectionName: "vector_store"
-#        embeddingDimension: 1536
-#        indexType: IVF_FLAT
-#        metricType: COSINE
-#        initialize-schema: true
+
+  autoconfigure:
+    exclude: org.springframework.ai.autoconfigure.vectorstore.cassandra.CassandraVectorStoreAutoConfiguration,org.springframework.ai.autoconfigure.chat.memory.cassandra.CassandraChatMemoryAutoConfiguration
 
 security:
   allowedOrigins: "*"
@@ -63,12 +67,26 @@ admin:
       therapyFrequency: BIWEEKLY  # Enum value
       language: ENGLISH          # Enum value
       themePreference: DARK      # Enum value
-      therapistType: MINDFUL     # Enum value
+      supportStyle: MINDFUL     # Enum value
       age: 22                    # Integer value
       gender: MALE               # Enum value
 
-ahnis:
-  aiapp:
-    vectorStorePath: ./vectorstore.json
-    documentsToLoad:
-      - classpath:/therapist.txt
+
+management:
+
+  endpoint:
+    health:
+      show-details: "always"  # Always show detailed health info (safe for internal use)
+  endpoints:
+
+    web:
+      exposure:
+        include: "*"
+      base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
+logging:
+  level:
+
+    org.springframework.*: debug
+    com.datastax.oss: debug
+    org.bson.*: debug
+    org.springframework.data: debug

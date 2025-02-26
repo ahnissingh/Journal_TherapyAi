@@ -1,7 +1,7 @@
 package com.ahnis.journalai.controller;
-import com.ahnis.journalai.dto.AuthRequest;
-import com.ahnis.journalai.dto.AuthResponse;
-import com.ahnis.journalai.dto.UserRegistrationDTO;
+import com.ahnis.journalai.dto.auth.AuthRequest;
+import com.ahnis.journalai.dto.auth.AuthResponse;
+import com.ahnis.journalai.dto.user.request.UserRegistrationRequest;
 import com.ahnis.journalai.entity.User;
 import com.ahnis.journalai.security.JwtUtil;
 import com.ahnis.journalai.service.UserService;
@@ -61,7 +61,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationDTO dto) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationRequest dto) {
         User registeredUser = userService.registerUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(buildAuthResponse(registeredUser));

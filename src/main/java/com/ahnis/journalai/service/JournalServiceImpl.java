@@ -1,10 +1,9 @@
 package com.ahnis.journalai.service;
 
-import com.ahnis.journalai.dto.JournalRequestDTO;
-import com.ahnis.journalai.dto.JournalResponseDTO;
+import com.ahnis.journalai.dto.journal.JournalRequest;
+import com.ahnis.journalai.dto.journal.JournalResponse;
 import com.ahnis.journalai.entity.Journal;
-import com.ahnis.journalai.entity.User;
-import com.ahnis.journalai.exception.JournalNotFoundException;
+import com.ahnis.journalai.exception.custom.JournalNotFoundException;
 import com.ahnis.journalai.mapper.JournalMapper;
 import com.ahnis.journalai.repository.JournalRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +18,13 @@ public class JournalServiceImpl implements JournalService {
     private final JournalMapper journalMapper;
 
     @Override
-    public JournalResponseDTO createJournal(JournalRequestDTO dto, String userId) {
+    public JournalResponse createJournal(JournalRequest dto, String userId) {
         Journal journal = journalMapper.toEntity(dto, userId);
         return journalMapper.toDto(journalRepository.save(journal));
     }
 
     @Override
-    public List<JournalResponseDTO> getAllJournals(String userId) {
+    public List<JournalResponse> getAllJournals(String userId) {
         return journalRepository.findByUserId(userId)
                 .stream()
                 .map(journalMapper::toDto)
@@ -33,7 +32,7 @@ public class JournalServiceImpl implements JournalService {
     }
 
     @Override
-    public JournalResponseDTO getJournalById(String id, String userId) {
+    public JournalResponse getJournalById(String id, String userId) {
         Journal journal = journalRepository.findById(id)
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
         validateJournalOwnership(journal, userId);
@@ -41,7 +40,7 @@ public class JournalServiceImpl implements JournalService {
     }
 
     @Override
-    public JournalResponseDTO updateJournal(String id, JournalRequestDTO dto, String userId) {
+    public JournalResponse updateJournal(String id, JournalRequest dto, String userId) {
         Journal journal = journalRepository.findById(id)
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
         validateJournalOwnership(journal, userId);

@@ -1,15 +1,14 @@
 package com.ahnis.journalai.service;
 
-import com.ahnis.journalai.dto.PreferencesDTO;
-import com.ahnis.journalai.dto.UserRegistrationDTO;
-import com.ahnis.journalai.dto.UserResponseDTO;
-import com.ahnis.journalai.dto.UserUpdateDTO;
-import com.ahnis.journalai.entity.Preferences;
+import com.ahnis.journalai.dto.user.request.PreferencesRequest;
+import com.ahnis.journalai.dto.user.request.UserRegistrationRequest;
+import com.ahnis.journalai.dto.user.response.UserResponse;
+import com.ahnis.journalai.dto.user.request.UserUpdateRequest;
 import com.ahnis.journalai.entity.User;
 import com.ahnis.journalai.enums.Role;
-import com.ahnis.journalai.exception.EmailAlreadyExistsException;
-import com.ahnis.journalai.exception.UserNotFoundException;
-import com.ahnis.journalai.exception.UsernameAlreadyExistsException;
+import com.ahnis.journalai.exception.custom.EmailAlreadyExistsException;
+import com.ahnis.journalai.exception.custom.UserNotFoundException;
+import com.ahnis.journalai.exception.custom.UsernameAlreadyExistsException;
 import com.ahnis.journalai.mapper.UserMapper;
 import com.ahnis.journalai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User registerUser(UserRegistrationDTO registrationDTO) {
+    public User registerUser(UserRegistrationRequest registrationDTO) {
         validateRegistration(registrationDTO);
 
         User newUser = UserMapper.toEntity(registrationDTO);
@@ -42,13 +41,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponseDTO getCurrentUser() {
+    public UserResponse getCurrentUser() {
         User currentUser = getAuthenticatedUser();
         return UserMapper.toResponseDto(currentUser);
     }
 
     @Override
-    public UserResponseDTO updateUser(UserUpdateDTO updateDTO) {
+    public UserResponse updateUser(UserUpdateRequest updateDTO) {
         User currentUser = getAuthenticatedUser();
 
         // Update email if provided and changed
@@ -70,9 +69,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO updateUserPreferences(PreferencesDTO preferencesDTO) {
+    public UserResponse updateUserPreferences(PreferencesRequest preferencesRequest) {
         User currentUser = getAuthenticatedUser();
-        currentUser.setPreferences(UserMapper.toPreferencesEntity(preferencesDTO));
+        currentUser.setPreferences(UserMapper.toPreferencesEntity(preferencesRequest));
 
         User updatedUser = userRepository.save(currentUser);
         return UserMapper.toResponseDto(updatedUser);
@@ -87,7 +86,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
 
-    public List<UserResponseDTO> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toResponseDto)
                 .toList();
@@ -100,7 +99,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
     }
 
-    private void validateRegistration(UserRegistrationDTO dto) {
+    private void validateRegistration(UserRegistrationRequest dto) {
         if (userRepository.existsByUsername(dto.username())) {
             throw new UsernameAlreadyExistsException(dto.username());
         }

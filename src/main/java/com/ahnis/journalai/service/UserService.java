@@ -1,23 +1,23 @@
 package com.ahnis.journalai.service;
 
-import com.ahnis.journalai.dto.PreferencesDTO;
-import com.ahnis.journalai.dto.UserRegistrationDTO;
-import com.ahnis.journalai.dto.UserResponseDTO;
-import com.ahnis.journalai.dto.UserUpdateDTO;
+import com.ahnis.journalai.dto.user.request.PreferencesRequest;
+import com.ahnis.journalai.dto.user.request.UserRegistrationRequest;
+import com.ahnis.journalai.dto.user.response.UserResponse;
+import com.ahnis.journalai.dto.user.request.UserUpdateRequest;
 import com.ahnis.journalai.entity.User;
 
 import java.util.List;
 
 public interface UserService {
-    User registerUser(UserRegistrationDTO registrationDTO);
+    User registerUser(UserRegistrationRequest registrationDTO);
 
-    UserResponseDTO getCurrentUser();
+    UserResponse getCurrentUser();
 
-    UserResponseDTO updateUser(UserUpdateDTO userUpdateDTO);
+    UserResponse updateUser(UserUpdateRequest userUpdateRequest);
 
-    UserResponseDTO updateUserPreferences(PreferencesDTO preferencesDTO);
+    UserResponse updateUserPreferences(PreferencesRequest preferencesRequest);
 
     void deleteUser();
 
-    List<UserResponseDTO> getAllUsers(); //ONLY ADMINS WILL USE THIS
+    List<UserResponse> getAllUsers(); //ONLY ADMINS WILL USE THIS
 }

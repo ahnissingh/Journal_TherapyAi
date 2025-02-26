@@ -1,8 +1,6 @@
 package com.ahnis.journalai.config.properties;
 
-import com.ahnis.journalai.dto.PreferencesDTO;
 import com.ahnis.journalai.entity.Preferences;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;

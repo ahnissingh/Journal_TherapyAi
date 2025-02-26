@@ -1,9 +1,8 @@
 package com.ahnis.journalai.controller;
 
-import com.ahnis.journalai.dto.ApiResponse;
-import com.ahnis.journalai.dto.UserResponseDTO;
-import com.ahnis.journalai.dto.UserUpdateDTO;
-import com.ahnis.journalai.enums.Role;
+import com.ahnis.journalai.dto.common.ApiResponse;
+import com.ahnis.journalai.dto.user.response.UserResponse;
+import com.ahnis.journalai.dto.user.request.UserUpdateRequest;
 import com.ahnis.journalai.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +22,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getCurrentUser() {
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
         var currentUser = userService.getCurrentUser();
         return ResponseEntity.ok(ApiResponse.success(currentUser));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
-        UserResponseDTO updatedUser = userService.updateUser(userUpdateDTO);
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+        UserResponse updatedUser = userService.updateUser(userUpdateRequest);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser)); // Using ApiResponse with message
     }
 
@@ -42,11 +41,11 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')") //issue with preAuthorize using basic if statement
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAllUsers() {
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         userService.getCurrentUser().roles().forEach(role -> log.warn(String.valueOf(role)));
 //        if (!userService.getCurrentUser().roles().contains(Role.ADMIN))
 //            return ResponseEntity.ok(ApiResponse.success(HttpStatus.FORBIDDEN, "You must be ADMIN to get all users", null));
-        List<UserResponseDTO> users = userService.getAllUsers();
+        List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success(users)); //todo return 403 forbidden
     }
 

@@ -16,7 +16,7 @@ public class Preferences {
     private TherapyFrequency therapyFrequency;
     private Language language;
     private ThemePreference themePreference;
-    private TherapistType therapistType;
+    private SupportStyle supportStyle;
     private Integer age;
     private Gender gender;
 

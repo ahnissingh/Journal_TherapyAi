@@ -1,8 +1,8 @@
 package com.ahnis.journalai.controller;
 
-import com.ahnis.journalai.dto.ApiResponse;
-import com.ahnis.journalai.dto.JournalRequestDTO;
-import com.ahnis.journalai.dto.JournalResponseDTO;
+import com.ahnis.journalai.dto.common.ApiResponse;
+import com.ahnis.journalai.dto.journal.JournalRequest;
+import com.ahnis.journalai.dto.journal.JournalResponse;
 import com.ahnis.journalai.entity.User;
 import com.ahnis.journalai.service.JournalService;
 import lombok.RequiredArgsConstructor;
@@ -21,38 +21,38 @@ public class JournalController {
     private final JournalService journalService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<JournalResponseDTO>> createJournal(
-            @RequestBody JournalRequestDTO dto,
+    public ResponseEntity<ApiResponse<JournalResponse>> createJournal(
+            @RequestBody JournalRequest dto,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO response = journalService.createJournal(dto, user.getId());
+        JournalResponse response = journalService.createJournal(dto, user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED, "Journal created successfully", response));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JournalResponseDTO>>> getAllJournals(
+    public ResponseEntity<ApiResponse<List<JournalResponse>>> getAllJournals(
             @AuthenticationPrincipal User user
     ) {
-        List<JournalResponseDTO> journals = journalService.getAllJournals(user.getId());
+        List<JournalResponse> journals = journalService.getAllJournals(user.getId());
         return ResponseEntity.ok(ApiResponse.success(journals));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<JournalResponseDTO>> getJournalById(
+    public ResponseEntity<ApiResponse<JournalResponse>> getJournalById(
             @PathVariable String id,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO journal = journalService.getJournalById(id, user.getId());
+        JournalResponse journal = journalService.getJournalById(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(journal));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<JournalResponseDTO>> updateJournal(
+    public ResponseEntity<ApiResponse<JournalResponse>> updateJournal(
             @PathVariable String id,
-            @RequestBody JournalRequestDTO dto,
+            @RequestBody JournalRequest dto,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponseDTO updatedJournal = journalService.updateJournal(id, dto, user.getId());
+        JournalResponse updatedJournal = journalService.updateJournal(id, dto, user.getId());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.ACCEPTED, "Journal updated successfully", updatedJournal));
     }
 

@@ -1,15 +1,15 @@
 package com.ahnis.journalai.mapper;
 
-import com.ahnis.journalai.dto.PreferencesDTO;
-import com.ahnis.journalai.dto.UserRegistrationDTO;
-import com.ahnis.journalai.dto.UserResponseDTO;
+import com.ahnis.journalai.dto.user.request.PreferencesRequest;
+import com.ahnis.journalai.dto.user.request.UserRegistrationRequest;
+import com.ahnis.journalai.dto.user.response.UserResponse;
 import com.ahnis.journalai.entity.Preferences;
 import com.ahnis.journalai.entity.User;
 import com.ahnis.journalai.enums.*;
 
 public class UserMapper {
 
-    public static User toEntity(UserRegistrationDTO dto) {
+    public static User toEntity(UserRegistrationRequest dto) {
         return User.builder()
                 .username(dto.username())
                 .email(dto.email())
@@ -18,30 +18,31 @@ public class UserMapper {
                 .build();
     }
 
-    public static Preferences toPreferencesEntity(PreferencesDTO dto) {
+    public static Preferences toPreferencesEntity(PreferencesRequest dto) {
         return Preferences.builder()
                 .therapyFrequency(TherapyFrequency.valueOf(dto.therapyFrequency().name()))
                 .language(Language.valueOf(dto.language().name()))
                 .themePreference(ThemePreference.valueOf(dto.themePreference().name()))
-                .therapistType(TherapistType.valueOf(dto.therapistType().name()))
+                .supportStyle(SupportStyle.valueOf(dto.supportStyle().name()))
+
                 .age(dto.age())
                 .gender(dto.gender())
                 .build();
     }
 
-    public static PreferencesDTO toPreferencesDto(Preferences preferences) {
-        return new PreferencesDTO(
+    public static PreferencesRequest toPreferencesDto(Preferences preferences) {
+        return new PreferencesRequest(
                 TherapyFrequency.valueOf(preferences.getTherapyFrequency().name()),
                 Language.valueOf(preferences.getLanguage().name()),
                 ThemePreference.valueOf(preferences.getThemePreference().name()),
-                TherapistType.valueOf(preferences.getTherapistType().name()),
+                SupportStyle.valueOf(preferences.getSupportStyle().name()),
                 preferences.getAge(),
                 Gender.valueOf(preferences.getGender().name())
         );
     }
 
-    public static UserResponseDTO toResponseDto(User user) {
-        return new UserResponseDTO(
+    public static UserResponse toResponseDto(User user) {
+        return new UserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),

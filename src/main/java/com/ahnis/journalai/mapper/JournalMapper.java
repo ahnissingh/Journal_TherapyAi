@@ -1,16 +1,13 @@
 package com.ahnis.journalai.mapper;
 
-import com.ahnis.journalai.dto.JournalRequestDTO;
-import com.ahnis.journalai.dto.JournalResponseDTO;
+import com.ahnis.journalai.dto.journal.JournalRequest;
+import com.ahnis.journalai.dto.journal.JournalResponse;
 import com.ahnis.journalai.entity.Journal;
-import com.ahnis.journalai.entity.User;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 public class JournalMapper {
-    public Journal toEntity(JournalRequestDTO dto, String userId) {
+    public Journal toEntity(JournalRequest dto, String userId) {
         return Journal.builder()
                 .title(dto.title())
                 .content(dto.content())
@@ -18,8 +15,8 @@ public class JournalMapper {
                 .build();
     }
 
-    public JournalResponseDTO toDto(Journal journal) {
-        return new JournalResponseDTO(
+    public JournalResponse toDto(Journal journal) {
+        return new JournalResponse(
                 journal.getId(),
                 journal.getTitle(),
                 journal.getContent(),
