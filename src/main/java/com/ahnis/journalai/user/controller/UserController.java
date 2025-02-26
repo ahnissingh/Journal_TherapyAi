@@ -9,12 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,7 +28,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
-        UserResponse updatedUser = userService.updateUser(userUpdateRequest);
+        UserResponse updatedUser = userService.updateCurrentUser(userUpdateRequest);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser)); // Using ApiResponse with message
     }
 

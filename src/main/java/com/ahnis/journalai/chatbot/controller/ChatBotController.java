@@ -1,0 +1,44 @@
+package com.ahnis.journalai.chatbot.controller;
+
+import com.ahnis.journalai.chatbot.dto.ChatRequest;
+import com.ahnis.journalai.chatbot.dto.ChatResponse;
+import com.ahnis.journalai.chatbot.service.ChatService;
+import com.ahnis.journalai.user.entity.User;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+
+@RestController
+@RequestMapping("/api/chat")
+@Slf4j
+public class ChatBotController {
+    private final ChatService chatService;
+
+    public ChatBotController(ChatService chatService) {
+        this.chatService = chatService;
+    }
+
+    @PostMapping()
+    public ChatResponse chat(
+            @RequestBody ChatRequest chatRequest,
+            @AuthenticationPrincipal User user
+    ) {
+        return chatService.chatSync(user.getPreferences(), chatRequest, user.getId());
+    }
+
+    @PostMapping(value = "/c/{chatId}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public Flux<String> chatStream(@PathVariable(required = false) String chatId, @RequestBody ChatRequest2 chatRequest, @AuthenticationPrincipal User user) {
+        return chatService.chatFlux(chatRequest, chatId, user.getPreferences(), user.getId());
+    }
+
+    public record ChatRequest2(String message) {
+    }
+}
+
+

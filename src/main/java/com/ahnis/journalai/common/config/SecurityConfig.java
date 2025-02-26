@@ -53,7 +53,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() //Only public endpoint
                         .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
                         .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -66,7 +65,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));
-
+        config.setAllowCredentials(true);
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

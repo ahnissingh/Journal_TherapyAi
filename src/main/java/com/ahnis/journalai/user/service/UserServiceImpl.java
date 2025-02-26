@@ -4,22 +4,26 @@ import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
-import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.exception.UsernameAlreadyExistsException;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.UserRepository;
+import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -46,10 +50,32 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toResponseDto(currentUser);
     }
 
-    @Override
-    public UserResponse updateUser(UserUpdateRequest updateDTO) {
-        User currentUser = getAuthenticatedUser();
+    @Override //todo note: This is for admin user refactor to reduce duplicacy
+    public UserResponse updateUserById(String userId, UserUpdateRequest userUpdateRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
 
+        // Update email if provided and changed
+        if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
+            validateEmail(userUpdateRequest.email());
+            user.setEmail(userUpdateRequest.email());
+        }
+
+        // Update password if provided
+        if (userUpdateRequest.password() != null) {
+            user.setPassword(passwordEncoder.encode(userUpdateRequest.password()));
+        }
+        if (userUpdateRequest.preferences() != null) {
+            user.setPreferences(UserMapper.toPreferencesEntity(userUpdateRequest.preferences()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return UserMapper.toResponseDto(updatedUser);
+    }
+
+    @Override
+    public UserResponse updateCurrentUser(UserUpdateRequest updateDTO) {
+        User currentUser = getAuthenticatedUser();
         // Update email if provided and changed
         if (updateDTO.email() != null && !updateDTO.email().equals(currentUser.getEmail())) {
             validateEmail(updateDTO.email());
@@ -92,11 +118,59 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    //new methods
+    @Override
+    public void enableUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(getUsernameNotFoundExceptionSupplier(userId));
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void disableUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(getUsernameNotFoundExceptionSupplier(userId));
+        user.setEnabled(false);
+        userRepository.save(user);
+        log.warn("Disabled user {}", user.getUsername());
+
+    }
+
+    @Override
+    public void lockUser(String userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(getUsernameNotFoundExceptionSupplier(userId));
+        user.setAccountNonLocked(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void unlockUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(getUsernameNotFoundExceptionSupplier(userId));
+        user.setAccountNonLocked(true);
+        userRepository.save(user);
+    }
+
+
+    @Override
+    public void deleteUserById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow();
+        userRepository.delete(user);
+    }
+
+
     // Helper Methods
+    private Supplier<UsernameNotFoundException> getUsernameNotFoundExceptionSupplier(String userId) {
+        return () -> new UsernameNotFoundException("User not found " + userId);
+    }
+
     private User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsernameOrEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(getUsernameNotFoundExceptionSupplier(username));
     }
 
     private void validateRegistration(UserRegistrationRequest dto) {

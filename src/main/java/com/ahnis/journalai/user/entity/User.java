@@ -38,7 +38,18 @@ public class User implements UserDetails {
 
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
+    //new fields added
+    @Builder.Default
+    private boolean enabled = true; // Default to true
 
+    @Builder.Default
+    private boolean accountNonLocked = true; // Default to true
+
+    @Builder.Default
+    private boolean accountNonExpired = true; // Default to true
+
+    @Builder.Default
+    private boolean credentialsNonExpired = true; // Default to true
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -53,4 +64,23 @@ public class User implements UserDetails {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
 }
