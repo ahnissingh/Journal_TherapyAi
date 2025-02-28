@@ -1,4 +1,28 @@
 spring:
+  ai:
+    vectorstore:
+      milvus:
+        client:
+          host: "localhost"
+          port: 19530
+          username: "root"
+          password: "milvus"
+        databaseName: "journal_ai"
+        collectionName: "vector_store"
+        embeddingDimension: 1536
+        indexType: IVF_FLAT
+        metricType: COSINE
+        initialize-schema: true
+
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-3-small
+
+      chat:
+        options:
+          model: gpt-4-turbo
   application:
 
     name: JournalAI2
@@ -21,28 +45,7 @@ spring:
     username: admin
     password: admin
     schema-action: create_if_not_exists
-  ai:
-    vectorstore:
-      milvus:
-        client:
-          host: "localhost"
-          port: 19530
-          username: "root"
-          password: "milvus"
-        databaseName: "journal_ai"
-        collectionName: "vector_store"
-        embeddingDimension: 1536
-        indexType: IVF_FLAT
-        metricType: COSINE
-        initialize-schema: true
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      embedding:
-        options:
-          model: text-embedding-3-small
-      chat:
-        options:
-          model: gpt-4-turbo
+
 
 
   autoconfigure:

@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     @Override //todo note: This is for admin user refactor to reduce duplicacy
     public UserResponse updateUserById(String userId, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found: ", userId));
 
         // Update email if provided and changed
         if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
@@ -111,7 +111,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toResponseDto)
@@ -153,7 +152,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-
     @Override
     public void deleteUserById(String userId) {
         User user = userRepository.findById(userId)
@@ -163,8 +161,8 @@ public class UserServiceImpl implements UserService {
 
 
     // Helper Methods
-    private Supplier<UsernameNotFoundException> getUsernameNotFoundExceptionSupplier(String userId) {
-        return () -> new UsernameNotFoundException("User not found " + userId);
+    private Supplier<UserNotFoundException> getUsernameNotFoundExceptionSupplier(String userId) {
+        return () -> new UserNotFoundException("User not found ", userId);
     }
 
     private User getAuthenticatedUser() {

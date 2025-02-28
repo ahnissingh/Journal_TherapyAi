@@ -1,17 +1,28 @@
 package com.ahnis.journalai.journal.controller;
 
+import com.ahnis.journalai.ai.analysis.JournalAnalysisService;
+import com.ahnis.journalai.ai.analysis.MoodReport;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.journal.service.JournalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/journals")
@@ -19,6 +30,9 @@ import java.util.List;
 public class JournalController {
 
     private final JournalService journalService;
+    private final MilvusVectorStore vectorStore;
+    private final OpenAiChatModel openAiChatModel;
+    private final JournalAnalysisService journalAnalysisService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<JournalResponse>> createJournal(
@@ -64,4 +78,11 @@ public class JournalController {
         journalService.deleteJournal(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.NO_CONTENT, "Journal deleted successfully", null));
     }
+
+    @GetMapping("/mood")
+    @Async
+    public CompletableFuture<MoodReport> analyse(@AuthenticationPrincipal User user) {
+        return journalAnalysisService.analyzeUserMood2(user.getId());
+    }
+
 }

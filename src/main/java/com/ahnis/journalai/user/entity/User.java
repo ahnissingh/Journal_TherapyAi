@@ -1,6 +1,7 @@
 package com.ahnis.journalai.user.entity;
 
 import com.ahnis.journalai.user.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Document(collection = "users")
 public class User implements UserDetails {
+
     @Id
     private String id;
 
@@ -32,7 +34,7 @@ public class User implements UserDetails {
 
     @Indexed(unique = true)
     private String email;
-
+    @JsonIgnore
     private String password;
     private Preferences preferences;
 

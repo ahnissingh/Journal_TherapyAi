@@ -95,6 +95,15 @@ services:
     depends_on:
       - "etcd"
       - "minio"
+  insight:
+    container_name: milvus-insight
+    image: milvusdb/milvus-insight
+    ports:
+      - "8085:3000"  # Exposing Insight UI on 8081
+    environment:
+      - MILVUS_URL=standalone:19530  # This works because both are in the 'milvus' network
+    depends_on:
+      - standalone
 
 networks:
   default:

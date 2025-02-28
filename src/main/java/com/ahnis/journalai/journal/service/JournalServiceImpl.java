@@ -6,6 +6,7 @@ import com.ahnis.journalai.journal.entity.Journal;
 import com.ahnis.journalai.journal.exception.JournalNotFoundException;
 import com.ahnis.journalai.journal.mapper.JournalMapper;
 import com.ahnis.journalai.journal.repository.JournalRepository;
+import com.ahnis.journalai.ai.embedding.JournalEmbeddingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,14 @@ import java.util.List;
 public class JournalServiceImpl implements JournalService {
     private final JournalRepository journalRepository;
     private final JournalMapper journalMapper;
+    private final JournalEmbeddingService journalEmbeddingService;
 
     @Override
     public JournalResponse createJournal(JournalRequest dto, String userId) {
         Journal journal = journalMapper.toEntity(dto, userId);
-        return journalMapper.toDto(journalRepository.save(journal));
+        Journal savedJournal = journalRepository.save(journal);
+        journalEmbeddingService.saveJournalEmbeddings(savedJournal);
+        return journalMapper.toDto(savedJournal);
     }
 
     @Override

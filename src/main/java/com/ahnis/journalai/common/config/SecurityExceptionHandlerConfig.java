@@ -23,6 +23,7 @@ public class SecurityExceptionHandlerConfig {
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper) {
+
         return (request, response, ex) -> {
             String message = switch (ex) {
                 case BadCredentialsException _ -> "Invalid credentials";

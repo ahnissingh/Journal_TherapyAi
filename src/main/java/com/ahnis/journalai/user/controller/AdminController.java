@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class AdminController {
     private final UserService userService;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository; //todo bad practice remove it later
 
 
     @GetMapping("/users")
