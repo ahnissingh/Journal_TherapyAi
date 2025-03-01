@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,7 +37,12 @@ public class User implements UserDetails {
     private String email;
     @JsonIgnore
     private String password;
+
     private Preferences preferences;
+
+    //New field update
+    @Indexed
+    private LocalDate nextReportOn;
 
     @Builder.Default
     private Set<Role> roles = new HashSet<>();

@@ -5,6 +5,7 @@ import com.ahnis.journalai.user.dto.request.AuthRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.AuthResponse;
 import com.ahnis.journalai.user.entity.User;
+import com.ahnis.journalai.user.enums.ReportFrequency;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.UsernameOrEmailAlreadyExistsException;
 import com.ahnis.journalai.user.mapper.UserMapper;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Service
@@ -40,12 +42,25 @@ public class AuthServiceImpl implements AuthService {
 
         //Step3 hash the password and set to entity and set roles
         newUser.setPassword(passwordEncoder.encode(registrationDTO.password()));
-        newUser.setRoles(Set.of(Role.USER)); //Default role for users lmao wont give admin
+        newUser.setRoles(Set.of(Role.USER)); //Default role for users lmao won't give admin
 
-        //Step4 Convert entity back to response object (hides password and if other sensitive fields, scalable approach)
+        //Step4: Calculate nextReportOn based on reportFrequency in preferences
+        LocalDate nextReportOn = calculateNextReportOn(LocalDate.now(), newUser.getPreferences().getReportFrequency());
+        newUser.setNextReportOn(nextReportOn);
+
+        //Step5 Convert entity back to response object (hides password and if other sensitive fields, scalable approach)
         User savedUser = userRepository.save(newUser);
-        log.info("Saving user with username {} \n email {} \n preferences {} \n", registrationDTO.username(), registrationDTO.email(), registrationDTO.preferences());
+        log.info("Saving user with username {} \n email {} \n preferences {} \n nextReportOn {}",
+                registrationDTO.username(), registrationDTO.email(), registrationDTO.preferences(), newUser.getNextReportOn());
         return buildAuthResponse(savedUser);
+    }
+
+    private LocalDate calculateNextReportOn(LocalDate currentDate, ReportFrequency reportFrequency) {
+        return switch (reportFrequency) {
+            case WEEKLY -> currentDate.plusDays(7);
+            case BIWEEKLY -> currentDate.plusDays(14);
+            case MONTHLY -> currentDate.plusMonths(1);
+        };
     }
 
     @Override
