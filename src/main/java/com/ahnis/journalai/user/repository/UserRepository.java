@@ -6,17 +6,21 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ '$or' : [ { 'username' : ?0 }, { 'email' : ?0 } ] }")
     Optional<User> findByUsernameOrEmail(String identifier);
 
+    boolean existsByUsernameOrEmail(String username, String email);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
     Optional<User> findByUsername(String username);
+
 
     //todo make /api/users/me/preferences PUT API
     //todo as pref will be made at registration we need only put

@@ -6,50 +6,56 @@ import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-public class UserMapper {
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.WARN
+)
+public interface UserMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "preferences", source = "preferences")
+    User toEntity(UserRegistrationRequest dto);
 
-    public static User toEntity(UserRegistrationRequest dto) {
-        return User.builder()
-                .username(dto.username())
-                .email(dto.email())
-                .password(dto.password())
-                .preferences(toPreferencesEntity(dto.preferences()))
-                .build();
+    // Preferences -> PreferencesRequest
+    PreferencesRequest toPreferencesDto(Preferences preferences);
+
+    Preferences toPreferencesEntity(PreferencesRequest preferencesRequest);
+
+    //User -> UserResponse
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "username", source = "username")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "roles", source = "roles")
+    @Mapping(target = "preferences", source = "preferences")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "updatedAt", source = "updatedAt")
+    UserResponse toResponseDto(User user);
+
+    default ReportFrequency mapReportFrequency(String value) {
+        return ReportFrequency.valueOf(value);
     }
 
-    public static Preferences toPreferencesEntity(PreferencesRequest dto) {
-        return Preferences.builder()
-                .therapyFrequency(TherapyFrequency.valueOf(dto.therapyFrequency().name()))
-                .language(Language.valueOf(dto.language().name()))
-                .themePreference(ThemePreference.valueOf(dto.themePreference().name()))
-                .supportStyle(SupportStyle.valueOf(dto.supportStyle().name()))
-
-                .age(dto.age())
-                .gender(dto.gender())
-                .build();
+    default Language mapLanguage(String value) {
+        return Language.valueOf(value);
     }
 
-    public static PreferencesRequest toPreferencesDto(Preferences preferences) {
-        return new PreferencesRequest(
-                TherapyFrequency.valueOf(preferences.getTherapyFrequency().name()),
-                Language.valueOf(preferences.getLanguage().name()),
-                ThemePreference.valueOf(preferences.getThemePreference().name()),
-                SupportStyle.valueOf(preferences.getSupportStyle().name()),
-                preferences.getAge(),
-                Gender.valueOf(preferences.getGender().name())
-        );
+    default ThemePreference mapThemePreference(String value) {
+        return ThemePreference.valueOf(value);
     }
 
-    public static UserResponse toResponseDto(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRoles(),
-                toPreferencesDto(user.getPreferences()),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
+    default SupportStyle mapSupportStyle(String value) {
+        return SupportStyle.valueOf(value);
     }
+
+    default Gender mapGender(String value) {
+        return Gender.valueOf(value);
+    }
+
 }

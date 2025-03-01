@@ -6,6 +6,8 @@ import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.repository.UserRepository;
+import com.ahnis.journalai.user.service.AdminService;
+import com.ahnis.journalai.user.service.AuthService;
 import com.ahnis.journalai.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,27 +22,28 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminController {
-    private final UserService userService;
+    private final AdminService adminService;
+    private final AuthService authService;
     private final UserRepository userRepository; //todo bad practice remove it later
 
 
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         //directly get from repo no mapping
-        List<User> users = userRepository.findAll();
+        var users = adminService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<String>> createUsers(@RequestBody List<UserRegistrationRequest> userRegistrationRequests) {
-        userRegistrationRequests.forEach(userService::registerUser);
+        userRegistrationRequests.forEach(authService::registerUser);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(HttpStatus.CREATED, "Users created successfully", null));
     }
 
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String userId) {
-        userService.deleteUserById(userId);
+        adminService.deleteUserById(userId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User deleted successfully", null));
     }
 
@@ -49,32 +52,32 @@ public class AdminController {
             @PathVariable String userId,
             @RequestBody UserUpdateRequest userUpdateRequest
     ) {
-        UserResponse updatedUser = userService.updateUserById(userId, userUpdateRequest);
+        UserResponse updatedUser = adminService.updateUserById(userId, userUpdateRequest);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser));
     }
 
 
     @PostMapping("/users/{userId}/enable")
     public ResponseEntity<ApiResponse<Void>> enableUser(@PathVariable String userId) {
-        userService.enableUser(userId);
+        adminService.enableUser(userId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User enabled successfully", null));
     }
 
     @PostMapping("/users/{userId}/disable")
     public ResponseEntity<ApiResponse<Void>> disableUser(@PathVariable String userId) {
-        userService.disableUser(userId);
+        adminService.disableUser(userId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User disabled successfully", null));
     }
 
     @PostMapping("/users/{userId}/lock")
     public ResponseEntity<ApiResponse<Void>> lockUser(@PathVariable String userId) {
-        userService.lockUser(userId);
+        adminService.lockUser(userId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User locked successfully", null));
     }
 
     @PostMapping("/users/{userId}/unlock")
     public ResponseEntity<ApiResponse<Void>> unlockUser(@PathVariable String userId) {
-        userService.unlockUser(userId);
+        adminService.unlockUser(userId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User unlocked successfully", null));
     }
 }

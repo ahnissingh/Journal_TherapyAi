@@ -29,16 +29,14 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
         UserResponse updatedUser = userService.updateCurrentUser(userUpdateRequest);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser)); // Using ApiResponse with message
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser));
     }
 
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> deleteUser() {
-        userService.deleteUser();
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User deleted successfully", null)); // Response with NO_CONTENT status
+        userService.deleteCurrentUser();
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User deleted successfully", null));
     }
-
-
 
 
 }

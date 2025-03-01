@@ -9,15 +9,15 @@ import com.ahnis.journalai.journal.repository.JournalRepository;
 import com.ahnis.journalai.ai.embedding.JournalEmbeddingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class JournalServiceImpl implements JournalService {
     private final JournalRepository journalRepository;
-    private final JournalMapper journalMapper;
     private final JournalEmbeddingService journalEmbeddingService;
+    private final JournalMapper journalMapper;
 
     @Override
     public JournalResponse createJournal(JournalRequest dto, String userId) {
@@ -63,8 +63,7 @@ public class JournalServiceImpl implements JournalService {
     }
 
     private void validateJournalOwnership(Journal journal, String userId) {
-        if (!journal.getUserId().equals(userId)) {
+        if (!journal.getUserId().equals(userId))
             throw new JournalNotFoundException("Journal not found");
-        }
     }
 }

@@ -3,6 +3,7 @@ package com.ahnis.journalai.ai.chatbot.service;
 import com.ahnis.journalai.ai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.ai.chatbot.controller.ChatBotController;
 import com.ahnis.journalai.ai.chatbot.dto.ChatRequest;
+import com.ahnis.journalai.ai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.user.entity.Preferences;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -107,7 +108,7 @@ public class ChatServiceImpl implements ChatService {
         return new ChatResponse(conversationId, response);
     }
 
-    public Flux<String> chatFlux(ChatBotController.ChatRequest2 chatRequest, String chatId, Preferences userPreferences, String userId) {
+    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, Preferences userPreferences, String userId) {
         if (chatId == null) chatId = createConversation(userId);
         else if (!isValidConversation(userId, chatId)) throw new SecurityException("Invalid chat id for user ");
         var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
@@ -137,7 +138,7 @@ public class ChatServiceImpl implements ChatService {
                 .content();
     }
 
-    public Flux<String> chatFlux2(ChatBotController.ChatRequest2 chatRequest, String chatId, Preferences userPreferences, String userId) {
+    public Flux<String> chatFlux2(ChatStreamRequest chatRequest, String chatId, Preferences userPreferences, String userId) {
         var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
         Map<String, Object> userPreferencesMap = Map.of(
                 "supportStyle", userPreferences.getSupportStyle().toString(),

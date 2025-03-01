@@ -104,8 +104,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -123,7 +123,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
@@ -131,16 +130,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
 
     // Add this to save the security context for asynchronous processing
-    private final RequestAttributeSecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
+    private final RequestAttributeSecurityContextRepository securityContextRepository;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, ObjectMapper objectMapper) {
+        //For autowiring
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+        this.objectMapper = objectMapper;
+        //Not part of spring context
+        this.securityContextRepository = new RequestAttributeSecurityContextRepository();
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
             throws ServletException, IOException, ExpiredJwtException {
         try {
             final var authHeader = request.getHeader("Authorization");
 
             // Skip if no Bearer token is present
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                log.warn("No authorisation Bearer token was present or it must start with 'Bearer '.\n Going to next filter");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -148,12 +157,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Extract JWT and username
             final var jwt = authHeader.substring(7);
             final var username = jwtUtil.extractUsername(jwt);
-            log.info("JWT token {}", jwt);
-            log.info("Jwt username {}", username);
+//            log.info("JWT token {}", jwt);
+            log.info("Jwt token filter hit for username {}", username);
 
             // Authenticate if username is valid and no existing authentication
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
 
                 // Validate token and set authentication
                 if (jwtUtil.validateToken(jwt, userDetails)) {
@@ -169,7 +179,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     context.setAuthentication(authToken);
                     SecurityContextHolder.setContext(context);
 
-                    // Save the security context for asynchronous processing
+                    // Save the security context for asynchronous processing (This is very important as I was loosing jwt token on async requests)
                     securityContextRepository.saveContext(context, request, response);
 
                     log.info("User authenticated {} ", username);

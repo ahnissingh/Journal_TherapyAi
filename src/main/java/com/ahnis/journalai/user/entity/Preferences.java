@@ -1,7 +1,4 @@
-// Preferences.java
 package com.ahnis.journalai.user.entity;
-
-
 import com.ahnis.journalai.user.enums.*;
 import lombok.*;
 
@@ -14,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 public class Preferences {
 
-    private TherapyFrequency therapyFrequency;
+    private ReportFrequency reportFrequency;
     private Language language;
     private ThemePreference themePreference;
     private SupportStyle supportStyle;

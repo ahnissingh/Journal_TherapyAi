@@ -3,26 +3,28 @@ package com.ahnis.journalai.journal.mapper;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.journal.entity.Journal;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class JournalMapper {
-    public Journal toEntity(JournalRequest dto, String userId) {
-        return Journal.builder()
-                .title(dto.title())
-                .content(dto.content())
-                .userId(userId)
-                .build();
-    }
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.WARN
+)
+public interface JournalMapper {
 
-    public JournalResponse toDto(Journal journal) {
-        return new JournalResponse(
-                journal.getId(),
-                journal.getTitle(),
-                journal.getContent(),
-                journal.getCreatedAt(),
-                journal.getModifiedAt(),
-                journal.getUserId()
-        );
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(target = "userId", source = "userId")
+    Journal toEntity(JournalRequest dto, String userId);
+
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "title", source = "title")
+    @Mapping(target = "content", source = "content")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "modifiedAt", source = "modifiedAt")
+    @Mapping(target = "userId", source = "userId")
+    JournalResponse toDto(Journal journal);
 }

@@ -14,6 +14,7 @@ spring:
         metricType: COSINE
         initialize-schema: true
 
+
     openai:
       api-key: ${OPENAI_API_KEY}
       embedding:
@@ -37,14 +38,14 @@ spring:
       password: ${MONGO_DB_PASSWORD}
       host: journal-mongodb  #Change to env
       port: 27017 #change to env
-
-  cassandra:
-    contact-points: localhost:9042
-    keyspace-name: my_keyspace
-    local-datacenter: datacenter1
-    username: admin
-    password: admin
-    schema-action: create_if_not_exists
+#
+#  cassandra:
+#    contact-points: localhost:9042
+#    keyspace-name: my_keyspace
+#    local-datacenter: datacenter1
+#    username: admin
+#    password: admin
+#    schema-action: create_if_not_exists
 
 
 
@@ -69,7 +70,7 @@ admin:
     email: ${ADMIN_EMAIL:admin@example.com}
     password: ${ADMIN_PASSWORD:admin123}  # Set via env var in production
     preferences:
-      therapyFrequency: BIWEEKLY  # Enum value
+      reportFrequency: BIWEEKLY  # Enum value
       language: ENGLISH          # Enum value
       themePreference: DARK      # Enum value
       supportStyle: MINDFUL   # Enum value
@@ -90,7 +91,8 @@ management:
 
 logging:
   level:
-    org.springframework.*: debug
-    com.datastax.oss: debug
-    org.bson.*: debug
-    org.springframework.data: debug
+    org.springframework.scheduling.annotation: TRACE
+#    org.springframework.*: debug
+#    com.datastax.oss: debug
+#    org.bson.*: debug
+#    org.springframework.data: debug
