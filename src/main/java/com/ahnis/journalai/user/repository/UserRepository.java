@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,5 +46,10 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Update("{ '$set' : { 'password' : ?1 } }")
     long updatePassword(String userId, String password);
 
+    @Query("{ 'nextReportOn' : { $gte: ?0, $lt: ?1 } }")
+    List<User> findByNextReportOn(LocalDate startOfDay, LocalDate endOfDay);
 
+    @Query("{ '_id' : ?0 }")
+    @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
+    void updateByIdAndNextReportOn(String userId, LocalDate nextReportOn);
 }

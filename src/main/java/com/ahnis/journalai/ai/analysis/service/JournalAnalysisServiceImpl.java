@@ -1,6 +1,6 @@
 package com.ahnis.journalai.ai.analysis.service;
 
-import com.ahnis.journalai.ai.analysis.dto.MoodReport;
+import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -25,7 +25,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
     private final VectorStore vectorStore;
 
     @Async
-    public CompletableFuture<MoodReport> analyzeUserMood(String userId) {
+    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId) {
         log.info("Running inside {} ", Thread.currentThread());
         log.info("is the thread virtual {}", Thread.currentThread().isVirtual());
         // Step 1: Retrieve documents filtered by userId and date range
@@ -57,17 +57,17 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
                 {entries}
                 """;
 
-        String format = new BeanOutputConverter<>(MoodReport.class).getFormat();
-        String promptText = String.format(promptTemplate, MoodReport.class.getName()) + "\n" + format;
+        String format = new BeanOutputConverter<>(MoodReportResponse.class).getFormat();
+        String promptText = String.format(promptTemplate, MoodReportResponse.class.getName()) + "\n" + format;
 
         // Step 5: Send the prompt to the language model (e.g., OpenAI GPT)
         var response = chatModel.call(new Prompt(promptText));
 
         // Step 6: Parse the response into a MoodReport object
-        BeanOutputConverter<MoodReport> outputConverter = new BeanOutputConverter<>(MoodReport.class);
-        MoodReport moodReport = outputConverter.convert(response.getResult().getOutput().getContent());
+        BeanOutputConverter<MoodReportResponse> outputConverter = new BeanOutputConverter<>(MoodReportResponse.class);
+        MoodReportResponse moodReportResponse = outputConverter.convert(response.getResult().getOutput().getContent());
 
         // Step 7: Return completed future
-        return CompletableFuture.completedFuture(moodReport);
+        return CompletableFuture.completedFuture(moodReportResponse);
     }
 }

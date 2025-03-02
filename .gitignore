@@ -36,3 +36,4 @@ build/
 /test users details.txt
 /volumes/
 /volumes/
+/src/main/resources/bootstrap/users.json

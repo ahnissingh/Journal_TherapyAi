@@ -4,22 +4,24 @@ import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.entity.Preferences;
-import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.service.AdminService;
+import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
@@ -113,6 +115,12 @@ public class AdminServiceImpl implements AdminService {
                     var user = userMapper.toEntity(dto);
                     user.setPassword(passwordEncoder.encode(dto.password()));
                     user.setRoles(Set.of(Role.USER));
+                    if (user.getPreferences() != null && user.getPreferences().getReportFrequency() != null) {
+                        LocalDate nextReportOn = UserUtils.calculateNextReportOn(LocalDate.now(), user.getPreferences().getReportFrequency());
+                        user.setNextReportOn(nextReportOn);
+
+                    }
+
                     return user;
                 })
                 .toList();//immutable list as we don't need to edit this
@@ -129,4 +137,6 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByEmail(email))
             throw new EmailAlreadyExistsException(email);
     }
+
+
 }

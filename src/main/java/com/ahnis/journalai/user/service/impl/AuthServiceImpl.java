@@ -11,6 +11,7 @@ import com.ahnis.journalai.user.exception.UsernameOrEmailAlreadyExistsException;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.service.AuthService;
+import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
         newUser.setRoles(Set.of(Role.USER)); //Default role for users lmao won't give admin
 
         //Step4: Calculate nextReportOn based on reportFrequency in preferences
-        LocalDate nextReportOn = calculateNextReportOn(LocalDate.now(), newUser.getPreferences().getReportFrequency());
+        LocalDate nextReportOn = UserUtils.calculateNextReportOn(LocalDate.now(), newUser.getPreferences().getReportFrequency());
         newUser.setNextReportOn(nextReportOn);
 
         //Step5 Convert entity back to response object (hides password and if other sensitive fields, scalable approach)
@@ -55,13 +56,6 @@ public class AuthServiceImpl implements AuthService {
         return buildAuthResponse(savedUser);
     }
 
-    private LocalDate calculateNextReportOn(LocalDate currentDate, ReportFrequency reportFrequency) {
-        return switch (reportFrequency) {
-            case WEEKLY -> currentDate.plusDays(7);
-            case BIWEEKLY -> currentDate.plusDays(14);
-            case MONTHLY -> currentDate.plusMonths(1);
-        };
-    }
 
     @Override
     public AuthResponse loginUser(AuthRequest authRequest) {

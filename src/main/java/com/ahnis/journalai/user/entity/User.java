@@ -36,6 +36,7 @@ public class User implements UserDetails {
     @Indexed(unique = true)
     private String email;
     @JsonIgnore
+    @ToString.Exclude
     private String password;
 
     private Preferences preferences;
