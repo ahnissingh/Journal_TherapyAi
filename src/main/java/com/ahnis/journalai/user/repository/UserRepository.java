@@ -5,6 +5,7 @@ import com.ahnis.journalai.user.entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
+import org.springframework.scheduling.annotation.Async;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -45,6 +46,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ '_id' : ?0 }")
     @Update("{ '$set' : { 'password' : ?1 } }")
     long updatePassword(String userId, String password);
+
 
     @Query("{ 'nextReportOn' : { $gte: ?0, $lt: ?1 } }")
     List<User> findByNextReportOn(LocalDate startOfDay, LocalDate endOfDay);

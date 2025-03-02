@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Set;
 
 @Service
@@ -46,8 +47,11 @@ public class AuthServiceImpl implements AuthService {
         newUser.setRoles(Set.of(Role.USER)); //Default role for users lmao won't give admin
 
         //Step4: Calculate nextReportOn based on reportFrequency in preferences
+
         LocalDate nextReportOn = UserUtils.calculateNextReportOn(LocalDate.now(), newUser.getPreferences().getReportFrequency());
-        newUser.setNextReportOn(nextReportOn);
+        LocalDate normalizedNextReportOn = nextReportOn.atStartOfDay(ZoneOffset.UTC).toLocalDate();//vimp step
+
+        newUser.setNextReportOn(normalizedNextReportOn);
 
         //Step5 Convert entity back to response object (hides password and if other sensitive fields, scalable approach)
         User savedUser = userRepository.save(newUser);

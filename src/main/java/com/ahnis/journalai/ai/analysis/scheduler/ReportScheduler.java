@@ -22,7 +22,7 @@ public class ReportScheduler {
     private final UserRepository userRepository;
     private final ReportService reportService;
 
-    @Scheduled(cron = "0 30 19 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 58 22 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
 
@@ -43,8 +43,8 @@ public class ReportScheduler {
                 //Step 2: update/increment nextReportOn
                 LocalDate nextReportOn = UserUtils
                         .calculateNextReportOn(today, user.getPreferences().getReportFrequency());
-
-                userRepository.updateByIdAndNextReportOn(user.getId(), nextReportOn);
+                LocalDate normalizedNextReportOn = nextReportOn.atStartOfDay(ZoneOffset.UTC).toLocalDate();
+                userRepository.updateByIdAndNextReportOn(user.getId(), normalizedNextReportOn);
                 log.info("Report generated and nextReportOn updated for user: {}", user.getUsername());
             } catch (Exception e) {
                 log.error("Failed to generate report for user: {}", user.getUsername(), e);

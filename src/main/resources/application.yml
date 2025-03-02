@@ -47,11 +47,8 @@ spring:
   #    password: admin
   #    schema-action: create_if_not_exists
 
-
-
-  autoconfigure:
-    exclude: org.springframework.ai.autoconfigure.vectorstore.cassandra.CassandraVectorStoreAutoConfiguration,org.springframework.ai.autoconfigure.chat.memory.cassandra.CassandraChatMemoryAutoConfiguration
-
+email:
+  SENDGRID_API_KEY: ${SENDGRID_API_KEY}
 security:
   allowedOrigins:
     - "http://localhost:63342"
@@ -96,6 +93,7 @@ management:
 
 logging:
   level:
+    com.sendgrid.*: debug
     org.springframework.scheduling.annotation: TRACE
     org.springframework.*: debug
     com.datastax.oss: debug
