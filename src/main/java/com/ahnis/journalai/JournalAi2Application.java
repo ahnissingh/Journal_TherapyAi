@@ -1,18 +1,13 @@
 package com.ahnis.journalai;
 
-import com.ahnis.journalai.notification.SendGridEmailService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 @Slf4j
@@ -30,12 +25,8 @@ import java.util.TimeZone;
 public class JournalAi2Application {
 
 
-
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        log.info("Current server time: {}", now.format(formatter));
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         SpringApplication.run(JournalAi2Application.class, args);
 

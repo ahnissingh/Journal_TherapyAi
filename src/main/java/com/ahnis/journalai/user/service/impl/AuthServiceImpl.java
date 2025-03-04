@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Set;
@@ -48,12 +49,11 @@ public class AuthServiceImpl implements AuthService {
 
         //Step4: Calculate nextReportOn based on reportFrequency in preferences
 
-        LocalDate nextReportOn = UserUtils.calculateNextReportOn(LocalDate.now(), newUser.getPreferences().getReportFrequency());
-        LocalDate normalizedNextReportOn = nextReportOn.atStartOfDay(ZoneOffset.UTC).toLocalDate();//vimp step
+        Instant nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), newUser.getPreferences().getReportFrequency());
+        newUser.setNextReportOn(nextReportOn);
+        newUser.setLastReportAt(null);//Newly registered  user has no reports obviously
 
-        newUser.setNextReportOn(normalizedNextReportOn);
-
-        //Step5 Convert entity back to response object (hides password and if other sensitive fields, scalable approach)
+        //Step5 Convert entity  to object having jwt token
         User savedUser = userRepository.save(newUser);
         log.info("Saving user with username {} \n email {} \n preferences {} \n nextReportOn {}",
                 registrationDTO.username(), registrationDTO.email(), registrationDTO.preferences(), newUser.getNextReportOn());

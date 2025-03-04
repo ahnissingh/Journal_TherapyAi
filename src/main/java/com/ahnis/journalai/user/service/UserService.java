@@ -9,9 +9,9 @@ public interface UserService {
 
     UserResponse getCurrentUser();
 
-    UserResponse updateCurrentUser(UserUpdateRequest userUpdateRequest);
+    void updateCurrentUser(UserUpdateRequest userUpdateRequest);
 
-    UserResponse updateUserPreferences(PreferencesRequest preferencesRequest);
+    void updateUserPreferences(PreferencesRequest preferencesRequest);
 
     void deleteCurrentUser();
 

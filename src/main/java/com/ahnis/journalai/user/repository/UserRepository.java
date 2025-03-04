@@ -2,11 +2,13 @@ package com.ahnis.journalai.user.repository;
 
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
+import org.springframework.data.mongodb.repository.DeleteQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.scheduling.annotation.Async;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -24,9 +26,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     Optional<User> findByUsername(String username);
 
-
-    //todo make /api/users/me/preferences PUT API
-    //todo as pref will be made at registration we need only put
     @Query("{ '_id' : ?0 }")
     @Update("{ '$set' : { 'preferences' : ?1 } }")
     void updatePreferences(String userId, Preferences preferences);
@@ -48,10 +47,35 @@ public interface UserRepository extends MongoRepository<User, String> {
     long updatePassword(String userId, String password);
 
 
-    @Query("{ 'nextReportOn' : { $gte: ?0, $lt: ?1 } }")
-    List<User> findByNextReportOn(LocalDate startOfDay, LocalDate endOfDay);
+    @Query("{ 'username' : ?0 }")
+    @Update("{ '$set' : { 'password' : ?1 } }")
+    long updatePasswordByUsername(String username, String password);
+
+    @Query("{ 'username' : ?0 }")
+    @Update("{ '$set' : { 'email' : ?1 } }")
+    long updateEmailByUsername(String username, String email);
+
+    @Query("{ 'nextReportOn' : { $gte: ?0, $lte: ?1 } }")
+    List<User> findByNextReportOn(Instant startOfDay, Instant endOfDay);
 
     @Query("{ '_id' : ?0 }")
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
-    void updateByIdAndNextReportOn(String userId, LocalDate nextReportOn);
+    void updateByIdAndNextReportOn(String userId, Instant nextReportOn);
+
+    @Query("{ 'username' : ?0 }")
+    @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
+    void updateByUsernameAndNextReportOn(String username, Instant nextReportOn);
+
+    @Query("{ 'username' : ?0 }")
+    @DeleteQuery
+    long deleteByUsername(String username);
+
+    @Query("{ 'username' : ?0 }")
+    @Update("{ '$set' : { 'preferences' : ?1 } }")
+    long updatePreferencesByUsername(String username, Preferences preferences);
+
+
+    @Query("{ 'username' : ?0 }")
+    @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
+    long updateNextReportOnByUsername(String username, Instant nextReportOn);
 }

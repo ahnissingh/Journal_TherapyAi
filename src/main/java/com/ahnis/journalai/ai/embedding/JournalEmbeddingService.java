@@ -27,7 +27,9 @@ public class JournalEmbeddingService {
                     Map.of(
                             "title", journal.getTitle(),
                             "userId", journal.getUserId(),
-                            "createdAt", journal.getCreatedAt()
+                            "createdAt", journal.getCreatedAt(),
+                            "modifiedAt", journal.getModifiedAt() //added modified at metadata
+
                     )
             );
             var textSplitter = new TokenTextSplitter();

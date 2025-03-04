@@ -1,16 +1,20 @@
 package com.ahnis.journalai.ai.analysis.scheduler;
 
 import com.ahnis.journalai.ai.analysis.service.ReportService;
+import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.repository.UserRepository;
-import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.time.ZonedDateTime;
+import java.util.List;
+
+import static com.ahnis.journalai.user.util.UserUtils.calculateNextReportOn;
 
 
 @Component
@@ -22,34 +26,51 @@ public class ReportScheduler {
     private final UserRepository userRepository;
     private final ReportService reportService;
 
-    @Scheduled(cron = "0 58 22 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 16 02 * * ?", zone = "UTC") // Runs at 12 AM UTC daily for now using custom time
     public void checkForReports() {
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        // Get the current date in UTC
+        ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        LocalDate todayInUTC = nowInUTC.toLocalDate();
 
-        var startOfDay = today.atStartOfDay(ZoneOffset.UTC).toLocalDate();
-        var endOfDay = startOfDay.plusDays(1);
-        log.info("Checking for reports due between: {} and {}", startOfDay, endOfDay);
-        var usersDueToday = userRepository.findByNextReportOn(startOfDay, endOfDay);
-        log.info("users have report today {}", Arrays.toString(usersDueToday.toArray()));
+        // Convert today's date to the start of the day in UTC
+        Instant startOfDayInUTC = todayInUTC.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endOfDayInUTC = todayInUTC.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        log.info("Checking for reports due between: {} and {} (UTC)", startOfDayInUTC, endOfDayInUTC);
+
+        // Fetch users who have nextReportAt equal to today
+        List<User> usersDueToday = userRepository.findByNextReportOn(startOfDayInUTC, endOfDayInUTC);
+        log.info("Users have report today: {}", usersDueToday);
 
         if (usersDueToday.isEmpty()) {
-            log.error("Users are empty");
+            log.info("No users found with reports due today.");
             return;
         }
-        for (var user : usersDueToday) {
+
+        // Process each user
+        usersDueToday.forEach(user -> {
             try {
-                //Step1 : generate and save report
-                reportService.generateAndSaveReport(user);
-                //Step 2: update/increment nextReportOn
-                LocalDate nextReportOn = UserUtils
-                        .calculateNextReportOn(today, user.getPreferences().getReportFrequency());
-                LocalDate normalizedNextReportOn = nextReportOn.atStartOfDay(ZoneOffset.UTC).toLocalDate();
-                userRepository.updateByIdAndNextReportOn(user.getId(), normalizedNextReportOn);
-                log.info("Report generated and nextReportOn updated for user: {}", user.getUsername());
+                Instant lastReportAt = user.getLastReportAt();
+                Instant nextReportOn = user.getNextReportOn();
+
+                if (lastReportAt != null) {
+                    // Fetch journals from the vector store between lastReportAt and today
+                    reportService.generateReport(user, lastReportAt, nextReportOn);
+                } else { //Last report is null means new user hai idhar
+                    // If lastReportAt is null, update lastReportAt and nextReportAt accordingly
+                    user.setLastReportAt(nextReportOn);
+                    Instant newNextReportOn = calculateNextReportOn(nextReportOn, user.getPreferences().getReportFrequency());
+                    user.setNextReportOn(newNextReportOn);
+                    userRepository.save(user);
+
+                    // Generate the report
+                    reportService.generateReport(user, nextReportOn, newNextReportOn);
+                }
+
+                log.info("Report generated and dates updated for user: {}", user.getUsername());
             } catch (Exception e) {
                 log.error("Failed to generate report for user: {}", user.getUsername(), e);
             }
-        }
+        });
     }
-
 }

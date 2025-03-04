@@ -8,7 +8,9 @@ import com.ahnis.journalai.journal.mapper.JournalMapper;
 import com.ahnis.journalai.journal.repository.JournalRepository;
 import com.ahnis.journalai.ai.embedding.JournalEmbeddingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 
@@ -20,11 +22,13 @@ public class JournalServiceImpl implements JournalService {
     private final JournalMapper journalMapper;
 
     @Override
-    public JournalResponse createJournal(JournalRequest dto, String userId) {
+    @Async
+    public void createJournal(JournalRequest dto, String userId) {
+        //Map dto to entity and get reference
         Journal journal = journalMapper.toEntity(dto, userId);
+        //Save the journal and pass it for embedding
         Journal savedJournal = journalRepository.save(journal);
         journalEmbeddingService.saveJournalEmbeddings(savedJournal);
-        return journalMapper.toDto(savedJournal);
     }
 
     @Override

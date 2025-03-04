@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -99,7 +100,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         // 5. Update audit fields
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedAt(Instant.now());
 
         // 6. Save the updated user (if needed)
         var updatedUser = userRepository.save(user);
@@ -116,7 +117,7 @@ public class AdminServiceImpl implements AdminService {
                     user.setPassword(passwordEncoder.encode(dto.password()));
                     user.setRoles(Set.of(Role.USER));
                     if (user.getPreferences() != null && user.getPreferences().getReportFrequency() != null) {
-                        LocalDate nextReportOn = UserUtils.calculateNextReportOn(LocalDate.now(), user.getPreferences().getReportFrequency());
+                        var nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), user.getPreferences().getReportFrequency());
                         user.setNextReportOn(nextReportOn);
 
                     }

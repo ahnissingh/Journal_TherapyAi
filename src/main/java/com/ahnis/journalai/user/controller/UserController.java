@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,9 +29,10 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
-        UserResponse updatedUser = userService.updateCurrentUser(userUpdateRequest);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", updatedUser));
+    public ResponseEntity<ApiResponse<Void>> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest,
+                                                        @AuthenticationPrincipal UserDetails userDetails) {
+        userService.updateCurrentUser(userUpdateRequest);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User updated successfully", null));
     }
 
     @DeleteMapping("/me")

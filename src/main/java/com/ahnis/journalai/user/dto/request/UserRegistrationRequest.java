@@ -1,6 +1,7 @@
 // UserRegistrationDTO.java
 package com.ahnis.journalai.user.dto.request;
 
+import com.ahnis.journalai.user.annotation.ValidTimezone;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,5 +22,9 @@ public record UserRegistrationRequest(
         String password,
 
         @Valid
-        PreferencesRequest preferences
-) {}
+        PreferencesRequest preferences,
+
+        @ValidTimezone
+        String timezone
+) {
+}

@@ -1,12 +1,14 @@
 package com.ahnis.journalai.journal.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 
 public record JournalResponse(
         String id,
         String title,
         String content,
-        LocalDateTime createdAt,
-        LocalDateTime modifiedAt,
+        Instant createdAt,
+        Instant modifiedAt,
         String userId
-) {}
+) {
+}

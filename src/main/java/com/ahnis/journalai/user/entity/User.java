@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,7 +44,12 @@ public class User implements UserDetails {
 
     //New field update
     @Indexed
-    private LocalDate nextReportOn;
+    private Instant nextReportOn;
+
+    @Indexed
+    private Instant lastReportAt;
+
+    private String timezone; // New field
 
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
@@ -61,10 +67,10 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired = true; // Default to true
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

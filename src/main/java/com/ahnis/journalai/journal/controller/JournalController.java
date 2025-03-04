@@ -26,12 +26,12 @@ public class JournalController {
     private final JournalAnalysisService journalAnalysisService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<JournalResponse>> createJournal(
+    public ResponseEntity<ApiResponse<Void>> createJournal(
             @RequestBody JournalRequest dto,
             @AuthenticationPrincipal User user
     ) {
-        JournalResponse response = journalService.createJournal(dto, user.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED, "Journal created successfully", response));
+        journalService.createJournal(dto, user.getId());
+        return ResponseEntity.ok(new ApiResponse<Void>(HttpStatus.OK, "Posted Journal", null));
     }
 
     @GetMapping

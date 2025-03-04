@@ -3,10 +3,11 @@ package com.ahnis.journalai.journal.mapper;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.journal.entity.Journal;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -27,4 +28,5 @@ public interface JournalMapper {
     @Mapping(target = "modifiedAt", source = "modifiedAt")
     @Mapping(target = "userId", source = "userId")
     JournalResponse toDto(Journal journal);
+
 }

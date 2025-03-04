@@ -1,12 +1,13 @@
-// Journal.java
 package com.ahnis.journalai.journal.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -22,11 +23,12 @@ public class Journal {
     private String id;
     private String title;
     private String content;
+    @Indexed
     @CreatedDate
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     @LastModifiedDate
-    private LocalDateTime modifiedAt;
+    private Instant modifiedAt;
 
-    private String userId;
-
+    @Indexed(unique = true)
+    private String userId; //added index for user id
 }

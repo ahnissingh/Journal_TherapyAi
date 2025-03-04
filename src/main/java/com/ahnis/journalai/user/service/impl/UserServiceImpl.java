@@ -26,9 +26,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    //for registration and login
-
-
     @Override
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser() {
@@ -36,13 +33,13 @@ public class UserServiceImpl implements UserService {
     }
 
     //    @Override //todo note: This is for admin user refactor to reduce duplicacy
-//    public UserResponse updateUserById(String userId, UserUpdateRequest userUpdateRequest) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new UserNotFoundException("User not found: ", userId));
+    //    public UserResponse updateUserById(String userId, UserUpdateRequest userUpdateRequest) {
+    //        User user = userRepository.findById(userId)
+    //                .orElseThrow(() -> new UserNotFoundException("User not found: ", userId));
 //
-//        // Update email if provided and changed
-//        if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
-//            validateEmail(userUpdateRequest.email());
+    //        // Update email if provided and changed
+    //        if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
+    //            validateEmail(userUpdateRequest.email());
 //            user.setEmail(userUpdateRequest.email());
 //        }
 //
@@ -60,32 +57,27 @@ public class UserServiceImpl implements UserService {
 //    }
 
     @Override
-    public UserResponse updateCurrentUser(UserUpdateRequest updateDTO) {
+    public void updateCurrentUser(UserUpdateRequest updateDTO) {
         User currentUser = getAuthenticatedUser();
         // Update email if provided and changed
         if (updateDTO.email() != null && !updateDTO.email().equals(currentUser.getEmail())) {
             validateEmail(updateDTO.email());
-            currentUser.setEmail(updateDTO.email());
+            userRepository.updateEmail(currentUser.getId(), updateDTO.email());
         }
         // Update password if provided
         if (updateDTO.password() != null) {
-            currentUser.setPassword(passwordEncoder.encode(updateDTO.password()));
+            userRepository.updatePassword(currentUser.getId(), passwordEncoder.encode(updateDTO.password()));
         }
         if (updateDTO.preferences() != null) {
-            currentUser.setPreferences(userMapper.toPreferencesEntity(updateDTO.preferences()));
+            userRepository.updatePreferences(currentUser.getId(), userMapper.toPreferencesEntity(updateDTO.preferences()));
         }
-
-        User updatedUser = userRepository.save(currentUser);
-        return userMapper.toResponseDto(updatedUser);
     }
 
     @Override
-    public UserResponse updateUserPreferences(PreferencesRequest preferencesRequest) {
+    public void updateUserPreferences(PreferencesRequest preferencesRequest) {
         User currentUser = getAuthenticatedUser();
-        currentUser.setPreferences(userMapper.toPreferencesEntity(preferencesRequest));
 
-        User updatedUser = userRepository.save(currentUser);
-        return userMapper.toResponseDto(updatedUser);
+        userRepository.updatePreferences(currentUser.getId(), userMapper.toPreferencesEntity(preferencesRequest));
     }
 
     @Override
@@ -95,17 +87,15 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     //new methods
 
     // Helper Methods
 //    @Cacheable(cacheNames = "authUser")
-    public User getAuthenticatedUser() {
+    private User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsernameOrEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
-
 
 
     private void validateEmail(String email) {

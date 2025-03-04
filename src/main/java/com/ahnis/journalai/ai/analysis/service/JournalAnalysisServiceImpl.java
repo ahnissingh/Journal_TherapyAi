@@ -1,6 +1,8 @@
 package com.ahnis.journalai.ai.analysis.service;
 
 import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.user.entity.Preferences;
+import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -12,6 +14,8 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +53,53 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         // Step 4: Create a prompt to analyze the mood
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
+                Include key emotions (as percentages as text), contextual insights, and recommendations.
+                Your response should be in JSON format.
+                The data structure for the JSON should match this Java class: %s
+                Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
+                Entries:
+                {entries}
+                """;
+
+        String format = new BeanOutputConverter<>(MoodReportResponse.class).getFormat();
+        String promptText = String.format(promptTemplate, MoodReportResponse.class.getName()) + "\n" + format;
+
+        // Step 5: Send the prompt to the language model (e.g., OpenAI GPT)
+        var response = chatModel.call(new Prompt(promptText));
+
+        // Step 6: Parse the response into a MoodReport object
+        BeanOutputConverter<MoodReportResponse> outputConverter = new BeanOutputConverter<>(MoodReportResponse.class);
+        MoodReportResponse moodReportResponse = outputConverter.convert(response.getResult().getOutput().getContent());
+
+        // Step 7: Return completed future
+        return CompletableFuture.completedFuture(moodReportResponse);
+    }
+
+    @Async
+    @Override
+    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Instant startDate, Instant endDate) {
+        List<Document> documents = Optional.ofNullable(vectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query("mood")
+                        .topK(3)
+                        .filterExpression("userId == '" + userId + "' && createdAt >= '" + startDate + "' && createdAt <= '" + endDate + "'")
+                        .build()
+        )).orElse(Collections.emptyList());
+
+        // Step 2: Extract the text content from the documents
+        List<String> contentList = documents.stream()
+                .map(Document::getText)
+                .toList();
+
+        // Step 3: Combine the content into a single string for the prompt
+        var combinedContent = String.join("\n", contentList);
+
+        // Step 4: Create a prompt to analyze the mood
+        //todo fixed key emotions as these refactor into
+        //todo Map<KeyEmotionEnum,String>
+        String promptTemplate = """
+                Analyze the mood of the following journal entries and provide a summary.
+                DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.
                 Include key emotions (as percentages as text), contextual insights, and recommendations.
                 Your response should be in JSON format.
                 The data structure for the JSON should match this Java class: %s

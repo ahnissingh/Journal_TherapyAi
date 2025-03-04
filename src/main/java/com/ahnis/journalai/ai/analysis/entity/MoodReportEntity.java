@@ -19,6 +19,8 @@ public class MoodReportEntity {
     @Indexed(unique = true)
     private String userId;
     private LocalDate reportDate;
+
+
     private String moodSummary;
     private Map<String, String> keyEmotions;
     private List<String> contextualInsights;

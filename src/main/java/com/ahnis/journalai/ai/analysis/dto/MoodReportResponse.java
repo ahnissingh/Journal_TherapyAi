@@ -14,11 +14,11 @@ public record MoodReportResponse(
         StringBuilder builder = new StringBuilder();
 
         // Mood Summary
-        builder.append("=== Mood Summary ===\n");
+        builder.append("Mood Summary:\n");
         builder.append(moodSummary).append("\n\n");
 
         // Key Emotions
-        builder.append("=== Key Emotions ===\n");
+        builder.append("Key Emotions:\n");
         keyEmotions.forEach((emotion, percentage) ->
                 builder.append("- ").append(emotion).append(": ").append(percentage).append("\n")
         );
