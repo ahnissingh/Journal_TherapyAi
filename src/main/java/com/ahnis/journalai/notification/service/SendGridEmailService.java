@@ -18,7 +18,6 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class SendGridEmailService {
-    //    private final SendGrid sendGrid;
     private final SendGridProperties sendGridProperties;
 
     public void sendEmail(String toEmail, String subject, String content) {

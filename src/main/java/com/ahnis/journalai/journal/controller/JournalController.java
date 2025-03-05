@@ -70,10 +70,6 @@ public class JournalController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.NO_CONTENT, "Journal deleted successfully", null));
     }
 
-    @GetMapping("/mood")
-    @Async
-    public CompletableFuture<MoodReportResponse> analyse(@AuthenticationPrincipal User user) {
-        return journalAnalysisService.analyzeUserMood(user.getId());
-    }
+
 
 }

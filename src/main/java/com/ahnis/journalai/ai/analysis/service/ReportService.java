@@ -28,7 +28,7 @@ public class ReportService {
         notificationService.sendEmailReport("ahnisaneja@gmail.com", report);
     }
 
-    @Async //Method 2 for testing
+    @Async
     public void generateReport(User user, Instant startDate, Instant endDate) {
         try {
             // Analyze journals between startDate and endDate

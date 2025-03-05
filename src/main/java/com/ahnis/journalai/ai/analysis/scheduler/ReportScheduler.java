@@ -5,6 +5,7 @@ import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,8 @@ public class ReportScheduler {
     //todo in prod and dev have cron expression in yaml
     //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
 
-    @Scheduled(cron = "0 30 21 * * ?", zone = "Asia/Kolkata")
+    @Async
+    @Scheduled(cron = "0 13 22 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);
