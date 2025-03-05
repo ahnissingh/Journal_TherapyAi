@@ -1,6 +1,7 @@
 package com.ahnis.journalai.common.config;
 
 import com.ahnis.journalai.common.dto.ErrorDetails;
+import com.ahnis.journalai.user.exception.UsernameOrEmailAlreadyExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,10 +26,15 @@ public class SecurityExceptionHandlerConfig {
     public AuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper) {
 
         return (request, response, ex) -> {
-            String message = switch (ex) {
-                case BadCredentialsException _ -> "Invalid credentials";
-                default -> AUTH_REQUIRED_MSG;
-            };
+            String message;
+            switch (ex) {
+                case BadCredentialsException _:
+                    message = "Invalid credentials";
+                    break;
+                default:
+                    message = AUTH_REQUIRED_MSG;
+                    break;
+            }
             log.error("Authentication failed: {}", ex.getMessage());
             var error = new ErrorDetails(
                     LocalDateTime.now(),

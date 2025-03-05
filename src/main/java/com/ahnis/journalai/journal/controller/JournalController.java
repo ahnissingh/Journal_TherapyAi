@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 public class JournalController {
 
     private final JournalService journalService;
-    private final JournalAnalysisService journalAnalysisService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> createJournal(

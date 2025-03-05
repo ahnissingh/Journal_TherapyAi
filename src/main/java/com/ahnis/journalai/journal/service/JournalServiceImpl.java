@@ -6,7 +6,7 @@ import com.ahnis.journalai.journal.entity.Journal;
 import com.ahnis.journalai.journal.exception.JournalNotFoundException;
 import com.ahnis.journalai.journal.mapper.JournalMapper;
 import com.ahnis.journalai.journal.repository.JournalRepository;
-import com.ahnis.journalai.ai.embedding.JournalEmbeddingService;
+import com.ahnis.journalai.journal.embedding.JournalEmbeddingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

@@ -20,6 +20,10 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,16 +49,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> {
-                    exception.authenticationEntryPoint(authenticationEntryPoint);
-                    exception.accessDeniedHandler(accessDeniedHandler);
-                })
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() //Only public endpoint
                         .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
                         .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> {
+                    exception.defaultAuthenticationEntryPointFor(authenticationEntryPoint,
+                            new NegatedRequestMatcher(publicEndpointsRequestMatcher())
+                    );
+                    exception.defaultAccessDeniedHandlerFor(accessDeniedHandler, new NegatedRequestMatcher(publicEndpointsRequestMatcher()));
+                })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -69,6 +76,15 @@ public class SecurityConfig {
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public RequestMatcher publicEndpointsRequestMatcher() {
+        return new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/auth/**"),
+                new AntPathRequestMatcher("/swagger-ui/**"),
+                new AntPathRequestMatcher("/v3/api-docs/**")
+        );
     }
 
     @Bean

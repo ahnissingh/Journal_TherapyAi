@@ -39,7 +39,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             BadCredentialsException.class,
             AccessDeniedException.class,
-            AuthenticationException.class,
     })
     public void handleSecurityExceptions(Exception ex, HttpServletResponse response) throws IOException {
         var errorDetails = new ErrorDetails(

@@ -11,5 +11,4 @@ public interface ChatService {
 
     Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, Preferences preferences, String id);
 
-    Flux<String> chatFlux2(ChatStreamRequest chatRequest, String chatId, Preferences preferences, String id);
 }

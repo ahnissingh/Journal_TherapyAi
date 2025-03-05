@@ -8,13 +8,15 @@ import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.service.UserService;
+import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -26,81 +28,67 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    @Override
+
     @Transactional(readOnly = true)
-    public UserResponse getCurrentUser() {
-        return userMapper.toResponseDto(getAuthenticatedUser());
+    //OK optimised
+    public UserResponse getUserResponseByUsername(String username) {
+        return userMapper.toResponseDto(this.getUserByUsername(username));
     }
 
-    //    @Override //todo note: This is for admin user refactor to reduce duplicacy
-    //    public UserResponse updateUserById(String userId, UserUpdateRequest userUpdateRequest) {
-    //        User user = userRepository.findById(userId)
-    //                .orElseThrow(() -> new UserNotFoundException("User not found: ", userId));
-//
-    //        // Update email if provided and changed
-    //        if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
-    //            validateEmail(userUpdateRequest.email());
-//            user.setEmail(userUpdateRequest.email());
-//        }
-//
-//        // Update password if provided
-//        if (userUpdateRequest.password() != null) {
-//            user.setPassword(passwordEncoder.encode(userUpdateRequest.password()));
-//        }
-//        if (userUpdateRequest.preferences() != null) {
-//            user.setPreferences(userMapper.toPreferencesEntity(userUpdateRequest.preferences()));
-//        }
-//
-//        User updatedUser = userRepository.save(user);
-//        return userMapper.toResponseDto(updatedUser);
-//
-//    }
 
-    @Override
-    public void updateCurrentUser(UserUpdateRequest updateDTO) {
-        User currentUser = getAuthenticatedUser();
+    @Transactional
+    public void updateUserByUsername(String username, UserUpdateRequest updateDTO) {
         // Update email if provided and changed
+        var currentUser = getUserByUsername(username);
         if (updateDTO.email() != null && !updateDTO.email().equals(currentUser.getEmail())) {
             validateEmail(updateDTO.email());
-            userRepository.updateEmail(currentUser.getId(), updateDTO.email());
+            userRepository.updateEmailByUsername(username, updateDTO.email());
         }
+
         // Update password if provided
         if (updateDTO.password() != null) {
-            userRepository.updatePassword(currentUser.getId(), passwordEncoder.encode(updateDTO.password()));
+            userRepository.updatePasswordByUsername(username, passwordEncoder.encode(updateDTO.password()));
         }
-        if (updateDTO.preferences() != null) {
-            userRepository.updatePreferences(currentUser.getId(), userMapper.toPreferencesEntity(updateDTO.preferences()));
+        // Update preferences if provided
+        //todo patch update every property I think can give better perfomance
+        var updatedPreferences = updateDTO.preferences();
+        if (updatedPreferences != null) {
+            if (updatedPreferences.reportFrequency() != null && !updatedPreferences.reportFrequency().equals(currentUser.getPreferences().getReportFrequency())) {
+                var nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), updatedPreferences.reportFrequency());
+                userRepository.updateByIdAndNextReportOn(currentUser.getId(), nextReportOn);
+            }
+            userRepository.updatePreferencesByUsername(username, userMapper.toPreferencesEntity(updatedPreferences));
         }
-    }
 
-    @Override
-    public void updateUserPreferences(PreferencesRequest preferencesRequest) {
-        User currentUser = getAuthenticatedUser();
-
-        userRepository.updatePreferences(currentUser.getId(), userMapper.toPreferencesEntity(preferencesRequest));
-    }
-
-    @Override
-    public void deleteCurrentUser() {
-        var currentUserId = getAuthenticatedUser().getId();
-        userRepository.deleteById(currentUserId);
     }
 
 
-    //new methods
+    @Transactional
+    public void updateUserPreferences(String username, PreferencesRequest preferencesRequest) {
+//        long count = userRepository.updatePreferencesByUsername(username, userMapper.toPreferencesEntity(preferencesRequest));
+//        if (count == 0) throw new UsernameNotFoundException("Username not found");
+        var currentUser = getUserByUsername(username);
+        if (!preferencesRequest.reportFrequency().equals(currentUser.getPreferences().getReportFrequency())) {
+            var nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), preferencesRequest.reportFrequency());
+            userRepository.updateNextReportOnByUsername(username, nextReportOn);
+        }
+        userRepository.updatePreferencesByUsername(username, userMapper.toPreferencesEntity(preferencesRequest));
+    }
+
+    @Transactional
+    public void deleteUserByUsername(String username) {
+        long deletedCount = userRepository.deleteByUsername(username);
+        if (deletedCount == 0) throw new UsernameNotFoundException("Username not found , User not deleted");
+    }
 
     // Helper Methods
-//    @Cacheable(cacheNames = "authUser")
-    private User getAuthenticatedUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsernameOrEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
-
 
     private void validateEmail(String email) {
         if (userRepository.existsByEmail(email))
             throw new EmailAlreadyExistsException(email);
     }
-
 }

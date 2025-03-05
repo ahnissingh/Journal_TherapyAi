@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -25,14 +24,14 @@ public class ReportService {
     @Async
     public void sendReport(User user, MoodReportResponse report) {
         log.info("Sending report to user: {}", user.getUsername());
-        notificationService.sendEmailReport("ahnisaneja@gmail.com", report);
+        notificationService.sendEmailReport(user.getEmail(), report);
     }
 
     @Async
     public void generateReport(User user, Instant startDate, Instant endDate) {
         try {
             // Analyze journals between startDate and endDate
-            MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId() ,user.getPreferences(), startDate, endDate).join();
+            MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId(), user.getUsername(), user.getPreferences(), startDate, endDate).join();
 
             // Save the report
             var reportEntity = buildReportEntity(user, moodReport);
@@ -50,13 +49,12 @@ public class ReportService {
     private MoodReportEntity buildReportEntity(User user, MoodReportResponse moodReport) {
         return MoodReportEntity.builder()
                 .userId(user.getId())
-                .reportDate(LocalDate.now())
+                .reportDate(Instant.now())
                 .moodSummary(moodReport.moodSummary())
                 .keyEmotions(moodReport.keyEmotions())
-                .contextualInsights(moodReport.contextualInsights())
+                .insights(moodReport.insights())
                 .recommendations(moodReport.recommendations())
+                .quote(moodReport.quote())
                 .build();
-
-
     }
 }

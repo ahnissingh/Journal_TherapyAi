@@ -1,7 +1,6 @@
 package com.ahnis.journalai.ai.chatbot.service;
 
 import com.ahnis.journalai.ai.chatbot.dto.ChatResponse;
-import com.ahnis.journalai.ai.chatbot.controller.ChatBotController;
 import com.ahnis.journalai.ai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.ai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.user.entity.Preferences;
@@ -18,11 +17,8 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.UUID;
@@ -65,13 +61,14 @@ public class ChatServiceImpl implements ChatService {
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
                         SearchRequest.builder()
-                                .topK(3)
+                                .topK(4)
                                 .build(), CUSTOM_USER_TEXT_ADVISE
 
                 ))
                 .build();
-    }
 
+
+    }
 
     public ChatResponse chatSync(Preferences userPreferences, ChatRequest chatRequest, String userId) {
         var conversationId = chatRequest.conversationId();
@@ -99,7 +96,8 @@ public class ChatServiceImpl implements ChatService {
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .advisors(a -> a
-                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
+//                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
+                        .param(VectorStoreChatMemoryAdvisor.DEFAULT_CHAT_MEMORY_CONVERSATION_ID, userId)
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
                 .call()
@@ -131,56 +129,10 @@ public class ChatServiceImpl implements ChatService {
                 .advisors(a -> a
 
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
-
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
+                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
                 .stream()
                 .content();
-    }
-
-    public Flux<String> chatFlux2(ChatStreamRequest chatRequest, String chatId, Preferences userPreferences, String userId) {
-        var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
-        Map<String, Object> userPreferencesMap = Map.of(
-                "supportStyle", userPreferences.getSupportStyle().toString(),
-                "supportStyleDescription", userPreferences.getSupportStyle().getDescription(),
-                "language", userPreferences.getLanguage(),
-                "userAge", userPreferences.getAge(),
-                "userGender", userPreferences.getGender(),
-                "userMessage", chatRequest.message()
-        );
-        Prompt userChatbotPrompt = userChatbotPromptTemplate.create(userPreferencesMap);
-
-        // Use a final variable to store the chatId
-        final String finalChatId = chatId;
-
-        return Mono.fromCallable(() -> {
-                    if (finalChatId == null) {
-                        return createConversation(userId); // Create a new conversation if chatId is null
-                    } else if (!isValidConversation(userId, finalChatId)) {
-                        throw new SecurityException("Invalid chat id for user");
-                    }
-                    return finalChatId; // Return the validated chatId
-                })
-                .onErrorResume(SecurityException.class, e -> {
-                    log.error("Security violation: {}", e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage()));
-                })
-                .flatMapMany(conversationFinalId -> {
-                    // Rest of the logic
-                    return chatClient
-                            .prompt(userChatbotPrompt)
-                            .system(systemMessageResource)
-                            .advisors(a -> a
-                                    .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                                    .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                                    .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                            .stream()
-                            .content()
-                            .onErrorResume(e -> {
-                                log.error("Error during streaming", e);
-                                return Flux.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred"));
-                            });
-                });
     }
 
     private String createConversation(String userId) {

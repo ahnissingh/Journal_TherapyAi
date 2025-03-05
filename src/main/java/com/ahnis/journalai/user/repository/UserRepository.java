@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -62,6 +63,12 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
     void updateByIdAndNextReportOn(String userId, Instant nextReportOn);
 
+    @Transactional
+    @Query("{ '_id' : ?0 }")
+    @Update("{ '$set' : { 'lastReportAt' : ?1 } }")
+    void updateByIdAndLastReportAt(String userId, Instant lastReportAt);
+
+    @Transactional
     @Query("{ 'username' : ?0 }")
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
     void updateByUsernameAndNextReportOn(String username, Instant nextReportOn);

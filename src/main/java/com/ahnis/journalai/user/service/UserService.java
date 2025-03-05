@@ -1,19 +1,15 @@
 package com.ahnis.journalai.user.service;
 
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
-import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
+import com.ahnis.journalai.user.dto.response.UserResponse;
 
 public interface UserService {
+    UserResponse getUserResponseByUsername(String username);
 
+    void updateUserByUsername(String username, UserUpdateRequest updateDTO);
 
-    UserResponse getCurrentUser();
+    void updateUserPreferences(String username, PreferencesRequest preferencesRequest);
 
-    void updateCurrentUser(UserUpdateRequest userUpdateRequest);
-
-    void updateUserPreferences(PreferencesRequest preferencesRequest);
-
-    void deleteCurrentUser();
-
-
+    void deleteUserByUsername(String username);
 }

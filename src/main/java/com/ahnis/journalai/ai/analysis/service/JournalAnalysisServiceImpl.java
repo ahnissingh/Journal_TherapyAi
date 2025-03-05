@@ -30,10 +30,9 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
     private final VectorStore vectorStore;
 
 
-
     @Async
     @Override
-    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Preferences userPreferences, Instant startDate, Instant endDate) {
+    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, String username, Preferences userPreferences, Instant startDate, Instant endDate) {
         List<Document> documents = Optional.ofNullable(vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query("mood")
@@ -53,7 +52,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         // Step 4: Create a prompt to analyze the mood
         //todo fixed key emotions as these refactor into
         //todo Map<KeyEmotionEnum,String>
-        String promptText = generatePromptForUser(userPreferences);
+        String promptText = generatePromptForUser(username, userPreferences);
 
         // Step 5: Send the prompt to the language model (e.g., OpenAI GPT)
         var response = chatModel.call(new Prompt(promptText));
@@ -66,7 +65,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         return CompletableFuture.completedFuture(moodReportResponse);
     }
 
-    private static @NotNull String generatePromptForUser(Preferences userPreferences) {
+    private static @NotNull String generatePromptForUser(String username, Preferences userPreferences) {
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
                 DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.
@@ -75,16 +74,18 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
                 The data structure for the JSON should match this Java class: %s
                 Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
                 Keep the language of the report %s and keep the tone for any text %s
+                Do not address the user as 'user' but address them with their username %s use this name STRICTLY ONCE  in the report ONLY at the BEGINNING.
                 Entries:
                 {entries}
                 """;
 
         String format = new BeanOutputConverter<>(MoodReportResponse.class).getFormat();
-        String promptText = String.format(promptTemplate,
+        return String.format(promptTemplate,
                 MoodReportResponse.class.getName(),
                 userPreferences.getLanguage().name(),
-                userPreferences.getSupportStyle().name()
+                userPreferences.getSupportStyle().name(),
+                username
         ) + "\n" + format;
-        return promptText;
+
     }
 }
