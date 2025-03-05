@@ -16,6 +16,7 @@ public final class UserUtils {
 
     public static Instant calculateNextReportOn(Instant currentDate, ReportFrequency reportFrequency) {
         return switch (reportFrequency) {
+            case DAILY -> currentDate.plus(1, ChronoUnit.DAYS);
             case WEEKLY -> currentDate.plus(7, ChronoUnit.DAYS);
             case BIWEEKLY -> currentDate.plus(14, ChronoUnit.DAYS);
             case MONTHLY -> {

@@ -77,7 +77,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
 
     @Async
     @Override
-    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Instant startDate, Instant endDate) {
+    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Preferences userPreferences, Instant startDate, Instant endDate) {
         List<Document> documents = Optional.ofNullable(vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query("mood")
@@ -104,12 +104,19 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
                 Your response should be in JSON format.
                 The data structure for the JSON should match this Java class: %s
                 Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
+                Keep the language of the report %s and keep the tone for any text %s the description for the tone %s
                 Entries:
                 {entries}
                 """;
 
         String format = new BeanOutputConverter<>(MoodReportResponse.class).getFormat();
-        String promptText = String.format(promptTemplate, MoodReportResponse.class.getName()) + "\n" + format;
+        String promptText = String.format(promptTemplate,
+                MoodReportResponse.class.getName(),
+                userPreferences.getLanguage().name(),
+                userPreferences.getSupportStyle().name(),
+                userPreferences.getSupportStyle().getDescription()
+
+        ) + "\n" + format;
 
         // Step 5: Send the prompt to the language model (e.g., OpenAI GPT)
         var response = chatModel.call(new Prompt(promptText));

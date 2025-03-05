@@ -25,14 +25,14 @@ public class ReportService {
     @Async
     public void sendReport(User user, MoodReportResponse report) {
         log.info("Sending report to user: {}", user.getUsername());
-        notificationService.sendEmailReport(user.getEmail(), report);
+        notificationService.sendEmailReport("ahnisaneja@gmail.com", report);
     }
 
     @Async //Method 2 for testing
     public void generateReport(User user, Instant startDate, Instant endDate) {
         try {
             // Analyze journals between startDate and endDate
-            MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId(), startDate, endDate).join();
+            MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId() ,user.getPreferences(), startDate, endDate).join();
 
             // Save the report
             var reportEntity = buildReportEntity(user, moodReport);

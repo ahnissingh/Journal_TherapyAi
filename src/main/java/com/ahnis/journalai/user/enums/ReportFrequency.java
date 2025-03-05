@@ -4,7 +4,7 @@ import com.ahnis.journalai.user.util.EnumUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum ReportFrequency {
-    WEEKLY, BIWEEKLY, MONTHLY;
+    DAILY, WEEKLY, BIWEEKLY, MONTHLY;
 
     @JsonCreator
     public static ReportFrequency fromString(String value) {

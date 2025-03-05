@@ -11,5 +11,5 @@ import java.util.concurrent.CompletableFuture;
 public interface JournalAnalysisService {
     CompletableFuture<MoodReportResponse> analyzeUserMood(String userId);
 
-    CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Instant startDate, Instant endDate);
+    CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, Preferences userPreferences, Instant startDate, Instant endDate);
 }

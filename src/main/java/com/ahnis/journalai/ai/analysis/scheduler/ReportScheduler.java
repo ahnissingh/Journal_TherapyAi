@@ -26,7 +26,11 @@ public class ReportScheduler {
     private final UserRepository userRepository;
     private final ReportService reportService;
 
-    @Scheduled(cron = "0 16 02 * * ?", zone = "UTC") // Runs at 12 AM UTC daily for now using custom time
+    //todo next asap PROFILING dev and prod
+    //todo in prod and dev have cron expression in yaml
+    //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
+
+    @Scheduled(cron = "0 30 21 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);

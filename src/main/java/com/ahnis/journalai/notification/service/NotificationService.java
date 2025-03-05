@@ -15,11 +15,7 @@ public class NotificationService {
     private final SendGridEmailService sendGridEmailService;
     private final EmailTemplateService emailTemplateService;
 
-    //    public void sendEmailReport(String toEmail, MoodReportResponse reportContent) {
-//        var subject = "Your Journal Report ";
-//        var htmlContent = emailTemplateService.generateMoodReportEmail(reportContent);
-//        sendGridEmailService.sendEmail(toEmail, subject, htmlContent);
-//    }
+
     @Async
     public void sendEmailReport(String toEmail, MoodReportResponse reportContent) {
         var subject = "Your Journal Report ";

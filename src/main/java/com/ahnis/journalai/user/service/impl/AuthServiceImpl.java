@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 @Service
@@ -50,7 +51,8 @@ public class AuthServiceImpl implements AuthService {
         //Step4: Calculate nextReportOn based on reportFrequency in preferences
 
         Instant nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), newUser.getPreferences().getReportFrequency());
-        newUser.setNextReportOn(nextReportOn);
+        Instant nextReportOnFixedAtStartOfDay = nextReportOn.truncatedTo(ChronoUnit.DAYS);
+        newUser.setNextReportOn(nextReportOnFixedAtStartOfDay);
         newUser.setLastReportAt(null);//Newly registered  user has no reports obviously
 
         //Step5 Convert entity  to object having jwt token
