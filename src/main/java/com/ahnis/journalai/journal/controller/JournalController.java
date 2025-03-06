@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/api/journals")
+@RequestMapping("/api/v1/journals")
 @RequiredArgsConstructor
 public class JournalController {
 
@@ -68,7 +68,6 @@ public class JournalController {
         journalService.deleteJournal(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.NO_CONTENT, "Journal deleted successfully", null));
     }
-
 
 
 }

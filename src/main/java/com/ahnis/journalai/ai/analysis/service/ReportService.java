@@ -1,16 +1,22 @@
 package com.ahnis.journalai.ai.analysis.service;
 
+import com.ahnis.journalai.ai.analysis.dto.MoodReportApiResponse;
 import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.ai.analysis.entity.MoodReportEntity;
+import com.ahnis.journalai.ai.analysis.exception.ReportNotFoundException;
+import com.ahnis.journalai.ai.analysis.mapper.MoodReportMapper;
 import com.ahnis.journalai.ai.analysis.repository.ReportRepository;
 import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -19,7 +25,8 @@ public class ReportService {
     private final JournalAnalysisService journalAnalysisService;
     private final ReportRepository reportRepository;
     private final NotificationService notificationService;
-
+    @Qualifier("moodReportMapper")
+    private final MoodReportMapper reportMapper;
 
     @Async
     public void sendReport(User user, MoodReportResponse report) {
@@ -28,13 +35,14 @@ public class ReportService {
     }
 
     @Async
+    @Transactional
     public void generateReport(User user, Instant startDate, Instant endDate) {
         try {
             // Analyze journals between startDate and endDate
             MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId(), user.getUsername(), user.getPreferences(), startDate, endDate).join();
 
             // Save the report
-            var reportEntity = buildReportEntity(user, moodReport);
+            var reportEntity = reportMapper.toMoodReportEntity(user, moodReport);
             reportRepository.save(reportEntity);
 
 
@@ -46,15 +54,23 @@ public class ReportService {
         }
     }
 
-    private MoodReportEntity buildReportEntity(User user, MoodReportResponse moodReport) {
-        return MoodReportEntity.builder()
-                .userId(user.getId())
-                .reportDate(Instant.now())
-                .moodSummary(moodReport.moodSummary())
-                .keyEmotions(moodReport.keyEmotions())
-                .insights(moodReport.insights())
-                .recommendations(moodReport.recommendations())
-                .quote(moodReport.quote())
-                .build();
+
+    public List<MoodReportApiResponse> getAllReportsByUserId(String userId) {
+        return reportRepository.findByUserId(userId).stream()
+                .map(reportMapper::toApiResponse)
+                .toList(); //Immutable list
+    }
+
+    public MoodReportApiResponse getReportById(String userId, String reportId) {
+        return reportRepository.findByIdAndUserId(reportId, userId)
+                .map(reportMapper::toApiResponse)
+                .orElseThrow(() -> new ReportNotFoundException("Report Not found {report id %s , user id %s} ".formatted(reportId, userId)));
+
+    }
+
+    public MoodReportApiResponse getLatestReportByUserId(String userId) {
+        return reportRepository.findFirstByUserIdOrderByReportDateDesc(userId)
+                .map(reportMapper::toApiResponse)
+                .orElseThrow(() -> new ReportNotFoundException("No reports found for %s userId".formatted(userId)));
     }
 }

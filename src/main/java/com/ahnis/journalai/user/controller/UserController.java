@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users2")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {

@@ -31,7 +31,7 @@ public class ReportScheduler {
     //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
 
 
-    @Scheduled(cron = "0 52 01 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 00 00 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);
@@ -52,21 +52,14 @@ public class ReportScheduler {
             return;
         }
 
-        // Process each user
-        //old logic now using atomic update
-        //  user.setLastReportAt(nextReportOn);
-        //  user.setNextReportOn(newNextReportOn);
-        //  userRepository.save(user);
-
         for (User user : usersDueToday) {
             try {
                 Instant lastReportAt = user.getLastReportAt();
                 Instant nextReportOn = user.getNextReportOn();
 
-                userRepository.updateByIdAndLastReportAt(user.getId(), nextReportOn);
+                userRepository.updateLastReportAtById(user.getId(), nextReportOn);
                 Instant newNextReportOn = calculateNextReportOn(nextReportOn, user.getPreferences().getReportFrequency());
-                userRepository.updateByIdAndNextReportOn(user.getId(), newNextReportOn);
-
+                userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
                 if (lastReportAt != null) reportService.generateReport(user, lastReportAt, nextReportOn);
                 else reportService.generateReport(user, nextReportOn, newNextReportOn);
                 log.info("Report generated and dates updated for user: {}", user.getUsername());

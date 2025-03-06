@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api/v1/chat")
 @Slf4j
 @RequiredArgsConstructor
 public class ChatBotController {

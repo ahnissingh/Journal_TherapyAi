@@ -1,5 +1,6 @@
 package com.ahnis.journalai.common.exception;
 
+import com.ahnis.journalai.ai.analysis.exception.ReportNotFoundException;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.common.dto.ErrorDetails;
 import com.ahnis.journalai.common.dto.ValidationErrorDetails;
@@ -51,6 +52,7 @@ public class GlobalExceptionHandler {
         objectMapper.writeValue(response.getWriter(), errorDetails);
     }
 
+
     private HttpStatus getHttpStatus(Exception ex) {
         return switch (ex) {
             case BadCredentialsException _ -> HttpStatus.UNAUTHORIZED;
@@ -59,7 +61,15 @@ public class GlobalExceptionHandler {
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
-
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleReportNotFoundException(ReportNotFoundException ex) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(), // Timestamp of the error
+                ex.getMessage(), // Exception message
+                "Report not found" // Additional details
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
     @ExceptionHandler({UserNotFoundException.class})
     public ResponseEntity<ErrorDetails> handleUserNotFound(
             UserNotFoundException ex, WebRequest request) {
@@ -149,6 +159,6 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
-    // Error detail records
+
 
 }

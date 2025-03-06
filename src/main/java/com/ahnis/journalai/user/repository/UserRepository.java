@@ -6,12 +6,9 @@ import org.springframework.data.mongodb.repository.DeleteQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,12 +58,12 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{ '_id' : ?0 }")
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
-    void updateByIdAndNextReportOn(String userId, Instant nextReportOn);
+    void updateNextReportOnById(String userId, Instant nextReportOn);
 
     @Transactional
     @Query("{ '_id' : ?0 }")
     @Update("{ '$set' : { 'lastReportAt' : ?1 } }")
-    void updateByIdAndLastReportAt(String userId, Instant lastReportAt);
+    void updateLastReportAtById(String userId, Instant lastReportAt);
 
     @Transactional
     @Query("{ 'username' : ?0 }")

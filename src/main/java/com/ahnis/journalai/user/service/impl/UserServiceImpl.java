@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         if (updatedPreferences != null) {
             if (updatedPreferences.reportFrequency() != null && !updatedPreferences.reportFrequency().equals(currentUser.getPreferences().getReportFrequency())) {
                 var nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), updatedPreferences.reportFrequency());
-                userRepository.updateByIdAndNextReportOn(currentUser.getId(), nextReportOn);
+                userRepository.updateNextReportOnById(currentUser.getId(), nextReportOn);
             }
             userRepository.updatePreferencesByUsername(username, userMapper.toPreferencesEntity(updatedPreferences));
         }

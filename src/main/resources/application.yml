@@ -20,12 +20,10 @@ spring:
       embedding:
         options:
           model: text-embedding-3-small
-
       chat:
         options:
           model: gpt-4-turbo
   application:
-
     name: JournalAI2
   threads:
     virtual:
@@ -93,6 +91,7 @@ management:
       exposure:
         include: "*"
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
+
 
 logging:
   level:
