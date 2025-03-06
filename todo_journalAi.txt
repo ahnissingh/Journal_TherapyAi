@@ -1,7 +1,0 @@
-1)User Module
-    1)Forget Password feature
-    2)Refresh Token
-    3)Pagination for admin controller
-2)Journal Module
-    1)Pagination for journals
-    2)
