@@ -10,17 +10,14 @@ public class TimezoneValidator implements ConstraintValidator<ValidTimezone, Str
 
     @Override
     public void initialize(ValidTimezone constraintAnnotation) {
+
     }
 
     @Override
     public boolean isValid(String timezone, ConstraintValidatorContext context) {
-        if (timezone == null) {
-            return false; // Timezone is required
-        }
-
+        if (timezone == null) return false;
         try {
-            //noinspection ResultOfMethodCallIgnored
-            ZoneId.of(timezone); // Throws exception if timezone is invalid
+         ZoneId.of(timezone);
             return true;
         } catch (Exception e) {
             return false;

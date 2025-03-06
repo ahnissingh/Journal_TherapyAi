@@ -1,5 +1,6 @@
 package com.ahnis.journalai.ai.analysis.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -32,5 +33,6 @@ public class MoodReportEntity {
     private List<String> recommendations;
     private String quote;
     @CreatedDate
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Instant createdAt;
 }

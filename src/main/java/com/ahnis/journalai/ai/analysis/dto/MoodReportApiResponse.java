@@ -1,5 +1,7 @@
 package com.ahnis.journalai.ai.analysis.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.Instant;
 import java.util.Map;
 import java.util.List;
@@ -24,6 +26,7 @@ public record MoodReportApiResponse(
         List<String> insights,
         List<String> recommendations,
         String quote,
+
         Instant createdAt
 ) {
 }

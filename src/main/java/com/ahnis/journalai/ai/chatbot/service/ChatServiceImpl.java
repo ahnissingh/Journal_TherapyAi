@@ -14,6 +14,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.mongodb.atlas.MongoDBAtlasVectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
@@ -26,7 +28,7 @@ import java.util.UUID;
 @Service
 @Primary
 @Slf4j
-// todo this approach vs questionAnswer approach (ask on linkedin)
+//todo this approach vs questionAnswer approach (ask on linkedin)
 //todo research if a whatsapp chatbot can be made
 //todo note that if 2 advisors are used it takes more time in case of messagechat and vector store it took 15 seconds and in case of messagechat and questionanswer it took roughly less than that
 public class ChatServiceImpl implements ChatService {
@@ -56,12 +58,12 @@ public class ChatServiceImpl implements ChatService {
             Do not include any explanations or notes about the process—only provide the response.
             """;
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
+    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, MongoDBAtlasVectorStore vectorStore) {
         this.chatClient = chatClient
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
                         SearchRequest.builder()
-                                .topK(4)
+                                .topK(3)
                                 .build(), CUSTOM_USER_TEXT_ADVISE
 
                 ))
@@ -96,8 +98,7 @@ public class ChatServiceImpl implements ChatService {
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .advisors(a -> a
-//                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
-                        .param(VectorStoreChatMemoryAdvisor.DEFAULT_CHAT_MEMORY_CONVERSATION_ID, userId)
+                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
                 .call()

@@ -1,6 +1,7 @@
 package com.ahnis.journalai.user.entity;
 
 import com.ahnis.journalai.user.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -67,9 +68,11 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired = true; // Default to true
 
     @CreatedDate
+
     private Instant createdAt;
 
     @LastModifiedDate
+
     private Instant updatedAt;
 
     @Override

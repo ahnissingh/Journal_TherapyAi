@@ -4,6 +4,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+./volumes/etcd
+./volumes/milvus
+./volumes/minio
+./volumes/etcd/**
+./volumes/milvus/**
+./volumes/minio/**
 volumes
 volumes/**
 ### STS ###
@@ -37,3 +43,4 @@ build/
 /volumes/
 /volumes/
 /src/main/resources/bootstrap/users.json
+/volumes/

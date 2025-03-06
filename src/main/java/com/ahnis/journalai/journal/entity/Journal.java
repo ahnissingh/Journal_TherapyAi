@@ -1,6 +1,7 @@
 package com.ahnis.journalai.journal.entity;
 
 import lombok.*;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -8,7 +9,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Document(collection = "journals")
 public class Journal {
+
     @Id
     private String id;
     private String title;
@@ -29,6 +30,7 @@ public class Journal {
     @LastModifiedDate
     private Instant modifiedAt;
 
-    @Indexed(unique = true)
+    @Indexed
     private String userId; //added index for user id
 }
+

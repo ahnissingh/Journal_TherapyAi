@@ -31,7 +31,7 @@ public class ReportScheduler {
     //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
 
 
-    @Scheduled(cron = "0 00 00 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 54 02 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);

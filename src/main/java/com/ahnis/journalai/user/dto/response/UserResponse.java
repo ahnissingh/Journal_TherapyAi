@@ -2,6 +2,7 @@ package com.ahnis.journalai.user.dto.response;
 
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public record UserResponse(
         Instant nextReportOn,
         Instant lastReportAt,// nullable (absent for new users)
         Instant createdAt,
+
         Instant updatedAt
 ) {
 }

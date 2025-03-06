@@ -1,19 +1,16 @@
 spring:
+  data:
+    mongodb:
+      uri: ${MONGO_ATLAS_URL}
+      database: journal_ai
+      auto-index-creation: true
   ai:
     vectorstore:
-      milvus:
-        client:
-          host: "localhost"
-          port: 19530
-          username: "root"
-          password: "milvus"
-        databaseName: "journal_ai"
-        collectionName: "vector_store"
-        embeddingDimension: 1536
-        indexType: IVF_FLAT
-        metricType: COSINE
-        initialize-schema: true
-
+      mongodb:
+        initialize-schema: false
+        collection-name: journals
+        index-name: vector_index
+        path-name: embeddings
 
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -28,15 +25,15 @@ spring:
   threads:
     virtual:
       enabled: true
-  data:
-    mongodb:
-
-      authentication-database: admin
-      database: journal_ai
-      username: ${MONGO_DB_USERNAME}
-      password: ${MONGO_DB_PASSWORD}
-      host: journal-mongodb  #Change to env
-      port: 27017 #change to env
+  #  data:
+  #    mongodb:
+  #
+  #      authentication-database: admin
+  #      database: journal_ai
+  #      username: ${MONGO_DB_USERNAME}
+  #      password: ${MONGO_DB_PASSWORD}
+  #      host: journal-mongodb  #Change to env
+  #      port: 27017 #change to env
   #
   #  cassandra:
   #    contact-points: localhost:9042
@@ -45,6 +42,8 @@ spring:
   #    username: admin
   #    password: admin
   #    schema-action: create_if_not_exists
+  main:
+    allow-bean-definition-overriding: true
 
 email:
   sendgrid:
@@ -91,7 +90,6 @@ management:
       exposure:
         include: "*"
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
-
 
 logging:
   level:

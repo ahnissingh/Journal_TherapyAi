@@ -30,7 +30,7 @@ public class JournalController {
             @AuthenticationPrincipal User user
     ) {
         journalService.createJournal(dto, user.getId());
-        return ResponseEntity.ok(new ApiResponse<Void>(HttpStatus.OK, "Posted Journal", null));
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, "Posted Journal", null));
     }
 
     @GetMapping

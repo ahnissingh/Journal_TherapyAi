@@ -2,10 +2,8 @@ package com.ahnis.journalai.ai.analysis.service;
 
 import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.user.entity.Preferences;
-import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
@@ -16,7 +14,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +62,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         return CompletableFuture.completedFuture(moodReportResponse);
     }
 
-    private static @NotNull String generatePromptForUser(String username, Preferences userPreferences) {
+    private static  String generatePromptForUser(String username, Preferences userPreferences) {
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
                 DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.
