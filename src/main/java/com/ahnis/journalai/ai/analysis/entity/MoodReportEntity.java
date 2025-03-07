@@ -24,7 +24,7 @@ import java.util.Map;
 public class MoodReportEntity {
     @Id
     private String id;
-    @Indexed(unique = true)
+    @Indexed
     private String userId;
     private Instant reportDate;
     private String moodSummary;
@@ -33,6 +33,5 @@ public class MoodReportEntity {
     private List<String> recommendations;
     private String quote;
     @CreatedDate
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Instant createdAt;
 }

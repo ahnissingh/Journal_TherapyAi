@@ -1,6 +1,7 @@
 package com.ahnis.journalai;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -12,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.TimeZone;
 
 @Slf4j
-@SpringBootApplication
+@SpringBootApplication(exclude = MilvusVectorStoreAutoConfiguration.class)
 @EnableMongoAuditing
 @ConfigurationPropertiesScan
 @EnableScheduling
