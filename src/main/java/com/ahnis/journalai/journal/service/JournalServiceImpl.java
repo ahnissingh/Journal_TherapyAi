@@ -55,7 +55,9 @@ public class JournalServiceImpl implements JournalService {
 
         journal.setTitle(dto.title());
         journal.setContent(dto.content());
-        return journalMapper.toDto(journalRepository.save(journal));
+        var updatedJournal = journalRepository.save(journal);
+        journalEmbeddingService.updateJournalEmbeddings(updatedJournal);
+        return journalMapper.toDto(updatedJournal);
     }
 
     @Override
@@ -64,6 +66,7 @@ public class JournalServiceImpl implements JournalService {
                 .orElseThrow(() -> new JournalNotFoundException("Journal not found"));
         validateJournalOwnership(journal, userId);
         journalRepository.delete(journal);
+        journalEmbeddingService.deleteJournalEmbeddings(id);
     }
 
     private void validateJournalOwnership(Journal journal, String userId) {

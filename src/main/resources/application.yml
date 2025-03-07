@@ -1,17 +1,26 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_ATLAS_URL}
+      authentication-database: admin
       database: journal_ai
-      auto-index-creation: true
+      username: ${MONGO_DB_USERNAME}
+      password: ${MONGO_DB_PASSWORD}
+      host: journal-mongodb  #Change to env
+      port: 27017 #change to env
   ai:
     vectorstore:
-      mongodb:
-        initialize-schema: false
-        collection-name: journals
-        index-name: vector_index
-        path-name: embeddings
-
+      milvus:
+        client:
+          host: "localhost"
+          port: 19530
+          username: "root"
+          password: "milvus"
+        databaseName: "journal_ai"
+        collectionName: "vector_store"
+        embeddingDimension: 1536
+        indexType: IVF_FLAT
+        metricType: COSINE
+        initialize-schema: true
     openai:
       api-key: ${OPENAI_API_KEY}
       embedding:

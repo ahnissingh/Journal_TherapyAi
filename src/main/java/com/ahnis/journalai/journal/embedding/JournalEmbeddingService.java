@@ -8,6 +8,7 @@ import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class JournalEmbeddingService {
     private final VectorStore vectorStore;
 
     @Async
+    @Transactional
     public void saveJournalEmbeddings(Journal journal) {
         try {
             var document = new Document(
@@ -28,7 +30,7 @@ public class JournalEmbeddingService {
                             "title", journal.getTitle(),
                             "userId", journal.getUserId(),
                             "createdAt", journal.getCreatedAt(),
-                            "modifiedAt", journal.getModifiedAt() //added modified at metadata
+                            "modifiedAt", journal.getModifiedAt()
 
                     )
             );
@@ -36,10 +38,41 @@ public class JournalEmbeddingService {
             var splitDocuments = textSplitter.apply(List.of(document));
             log.info("Adding document {} ", document);
             vectorStore.add(splitDocuments);
+
             log.info("Added document {} ", document);
 
         } catch (Exception e) {
             log.error("Failed to save journal embedding {} error {} ", journal, e);
         }
     }
+
+    @Async
+    @Transactional
+    public void updateJournalEmbeddings(Journal journal) {
+        try {
+            // First, delete the old embeddings
+            deleteJournalEmbeddings(journal.getId());
+
+            // Then, save the updated embeddings
+            saveJournalEmbeddings(journal);
+            log.info("Updated embeddings for journal {} ", journal);
+        } catch (Exception e) {
+            log.error("Failed to update journal embedding {} error {} ", journal, e);
+        }
+    }
+
+    @Async
+    @Transactional
+
+    public void deleteJournalEmbeddings(String journalId) {
+        try {
+            // Delete embeddings by userId and journalId
+            vectorStore.delete(List.of(journalId)); // Assuming journalId is the document ID in the vector store
+            log.info("Deleted embeddings for journalId {} ", journalId);
+        } catch (Exception e) {
+            log.error("Failed to delete journal embedding for journalId {} error {} ", journalId, e);
+        }
+    }
+
 }
+

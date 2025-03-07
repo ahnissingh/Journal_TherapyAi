@@ -8,14 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.mongodb.atlas.MongoDBAtlasVectorStore;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
@@ -58,15 +55,16 @@ public class ChatServiceImpl implements ChatService {
             Do not include any explanations or notes about the process—only provide the response.
             """;
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, MongoDBAtlasVectorStore vectorStore) {
+    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
         this.chatClient = chatClient
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
                         SearchRequest.builder()
-                                .topK(3)
+                                .topK(4)
                                 .build(), CUSTOM_USER_TEXT_ADVISE
 
                 ))
+                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
+
                 .build();
 
 
