@@ -41,6 +41,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     long updateEmail(String userId, String email);
 
     @Query("{ '_id' : ?0 }")
+    @Transactional
     @Update("{ '$set' : { 'password' : ?1 } }")
     long updatePassword(String userId, String password);
 
@@ -86,4 +87,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{ 'preferences.remindersEnabled': ?0 }")
     List<User> findByRemindersEnabled(boolean remindersEnabled);
+
+
 }

@@ -2,6 +2,7 @@ package com.ahnis.journalai.user.service;
 
 import com.ahnis.journalai.user.entity.PasswordResetToken;
 import com.ahnis.journalai.user.entity.User;
+import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.repository.PasswordResetTokenRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.sendgrid.*;
@@ -11,6 +12,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -47,7 +49,7 @@ public class PasswordResetService {
 
         // Generate a token
         String token = UUID.randomUUID().toString();
-        Instant expiryDate = Instant.now().plus(24, ChronoUnit.HOURS); // Token expires in 24 hours
+        Instant expiryDate = Instant.now().plus(60, ChronoUnit.MINUTES); // Token expires in 60 minutes
 
         // Save the token
         PasswordResetToken resetToken = PasswordResetToken.builder()
@@ -61,8 +63,10 @@ public class PasswordResetService {
         sendEmail(user.getEmail(), token);
     }
 
+    //todo refactor to use already built service classes
     // Send the email using SendGrid
-    private void sendEmail(String toEmail, String token) {
+    @Async
+    void sendEmail(String toEmail, String token) {
         Email from = new Email(fromEmail);
         Email to = new Email(toEmail);
         String subject = "Password Reset Request";
@@ -99,19 +103,19 @@ public class PasswordResetService {
     // Reset the password
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("Token not found"));
-        if (resetToken == null || resetToken.getExpiryDate().isBefore(Instant.now())) {
-            throw new RuntimeException("Invalid or expired token");
-        }
 
-        User user = userRepository.findById(resetToken.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (resetToken.getExpiryDate().isBefore(Instant.now()))
+            throw new RuntimeException("Invalid or expired token");
+
+        if (!userRepository.existsById(resetToken.getUserId()))
+            throw new UserNotFoundException("User not found", resetToken.getUserId());
 
         // Update the password
-
-        user.setPassword(passwordEncoder.encode(newPassword)); // Ensure you hash the password before saving
-        userRepository.save(user);
+        var updateCount = userRepository.updatePassword(resetToken.getUserId(), passwordEncoder.encode(newPassword));
 
         // Delete the token
+        if (updateCount == 0)
+            throw new RuntimeException("Exception while reseting password for user id" + resetToken.getUserId());
         passwordResetTokenRepository.delete(resetToken);
     }
 }

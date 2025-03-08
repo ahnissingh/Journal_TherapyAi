@@ -19,7 +19,7 @@ public class PasswordResetToken {
 
     private String token;
 
-    private String userId; // Reference to the user
+    private String userId;
 
-    private Instant expiryDate; // Token expiration date
+    private Instant expiryDate;
 }
