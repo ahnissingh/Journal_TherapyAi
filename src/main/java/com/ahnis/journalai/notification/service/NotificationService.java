@@ -1,8 +1,7 @@
 package com.ahnis.journalai.notification.service;
 
-import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.notification.template.EmailTemplateService;
-import com.ahnis.journalai.user.entity.PasswordResetToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;

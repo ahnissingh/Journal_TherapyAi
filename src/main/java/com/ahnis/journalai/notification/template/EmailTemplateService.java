@@ -1,15 +1,12 @@
 package com.ahnis.journalai.notification.template;
 
-import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.common.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service

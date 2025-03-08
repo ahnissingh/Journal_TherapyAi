@@ -1,7 +1,5 @@
 package com.ahnis.journalai.journal.controller;
 
-import com.ahnis.journalai.ai.analysis.service.JournalAnalysisService;
-import com.ahnis.journalai.ai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
@@ -10,12 +8,10 @@ import com.ahnis.journalai.journal.service.JournalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/journals")

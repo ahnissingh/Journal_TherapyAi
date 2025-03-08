@@ -1,6 +1,6 @@
 package com.ahnis.journalai.common.exception;
 
-import com.ahnis.journalai.ai.analysis.exception.ReportNotFoundException;
+import com.ahnis.journalai.analysis.exception.ReportNotFoundException;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.common.dto.ErrorDetails;
 import com.ahnis.journalai.common.dto.ValidationErrorDetails;
@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
