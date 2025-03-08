@@ -26,13 +26,13 @@ public class ChatBotController {
             @RequestBody ChatRequest chatRequest,
             @AuthenticationPrincipal User user
     ) {
-        return chatService.chatSync(user.getPreferences(), chatRequest, user.getId());
+        return chatService.chatSync(user, chatRequest, user.getId());
     }
 
     //Step2- use the chat id and get streaming response
     @PostMapping(value = "/c/{chatId}", produces = MediaType.TEXT_PLAIN_VALUE)
     public Flux<String> chatStream(@PathVariable(required = false) String chatId, @RequestBody ChatStreamRequest chatRequest, @AuthenticationPrincipal User user) {
-        return chatService.chatFlux(chatRequest, chatId, user.getPreferences(), user.getId());
+        return chatService.chatFlux(chatRequest, chatId, user, user.getId());
     }
 
 

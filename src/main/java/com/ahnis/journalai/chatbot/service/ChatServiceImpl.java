@@ -4,6 +4,7 @@ import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.user.entity.Preferences;
+import com.ahnis.journalai.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -18,7 +19,13 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.netty.udp.UdpServer;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,25 +42,26 @@ public class ChatServiceImpl implements ChatService {
     private Resource systemMessageResource;
     @Value("classpath:templates/chatbot/chatbot-prompt-template2.st")
     private Resource userChatbotPromptTemplateResource;
-    private static final String CUSTOM_USER_TEXT_ADVISE = """
-            Context information is below, surrounded by ---------------------
+    private static final String CUSTOM_USER_TEXT_ADVISE =
+            """
+                    Context information is below, surrounded by ---------------------
 
-            ---------------------
-            {question_answer_context}
-            ---------------------
-            Given the context of the user's journal entries above, provide a thoughtful and empathetic response.
-            Focus on the emotions, experiences, and insights shared in the journals.
-            If the user's question is related to their mood or experiences, analyze the context and provide a summary or advice based on the entries.
-            If the question cannot be answered using the context, politely inform the user that you don't have enough information to respond.
+                    ---------------------
+                    {question_answer_context}
+                    ---------------------
+                    Given the context of the user's journal entries above, provide a thoughtful and empathetic response.
+                    Focus on the emotions, experiences, and insights shared in the journals.
+                    If the user's question is related to their mood or experiences, analyze the context and provide a summary or advice based on the entries.
+                    If the question cannot be answered using the context, politely inform the user that you don't have enough information to respond.
 
-            Your response should be:
-            - Personalized: Address the user directly and reference specific details from their journals or their stored preferences
-            - Empathetic: Acknowledge the user's emotions and experiences.
-            - Actionable: Provide suggestions or insights that the user can act upon.
-            - Concise: Keep the response clear and to the point.
+                    Your response should be:
+                    - Personalized: Address the user directly and reference specific details from their journals or their stored preferences
+                    - Empathetic: Acknowledge the user's emotions and experiences.
+                    - Actionable: Provide suggestions or insights that the user can act upon.
+                    - Concise: Keep the response clear and to the point.
 
-            Do not include any explanations or notes about the process—only provide the response.
-            """;
+                    Do not include any explanations or notes about the process—only provide the response.
+                    """;
 
     public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
         this.chatClient = chatClient
@@ -64,32 +72,17 @@ public class ChatServiceImpl implements ChatService {
 
                 ))
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-
                 .build();
 
 
     }
 
-    public ChatResponse chatSync(Preferences userPreferences, ChatRequest chatRequest, String userId) {
+    public ChatResponse chatSync(User user, ChatRequest chatRequest, String userId) {
         var conversationId = chatRequest.conversationId();
-
-        // If no conversationId is provided, create a new one
-        // Validate that the conversationId belongs to the user
         if (conversationId == null || conversationId.isEmpty()) conversationId = createConversation(userId);
         else if (!isValidConversation(userId, conversationId)) throw new SecurityException("Invalid user id");
 
-        var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
-
-        Map<String, Object> userPreferencesMap = Map.of(
-                "supportStyle", userPreferences.getSupportStyle().toString(),
-                "supportStyleDescription", userPreferences.getSupportStyle().getDescription(),
-                "language", userPreferences.getLanguage(),
-                "userAge", userPreferences.getAge(),
-                "userGender", userPreferences.getGender(),
-                "userMessage", chatRequest.message()
-        );
-
-        Prompt userChatbotPrompt = userChatbotPromptTemplate.create(userPreferencesMap);
+        Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
         final var conversationFinalId = conversationId;
         var response = chatClient
@@ -105,33 +98,46 @@ public class ChatServiceImpl implements ChatService {
         return new ChatResponse(conversationId, response);
     }
 
-    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, Preferences userPreferences, String userId) {
+
+    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user, String userId) {
         if (chatId == null) chatId = createConversation(userId);
         else if (!isValidConversation(userId, chatId)) throw new SecurityException("Invalid chat id for user ");
-        var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
 
-        Map<String, Object> userPreferencesMap = Map.of(
-                "supportStyle", userPreferences.getSupportStyle().toString(),
-                "supportStyleDescription", userPreferences.getSupportStyle().getDescription(),
-                "language", userPreferences.getLanguage(),
-                "userAge", userPreferences.getAge(),
-                "userGender", userPreferences.getGender(),
-                "userMessage", chatRequest.message()
-        );
-
-        Prompt userChatbotPrompt = userChatbotPromptTemplate.create(userPreferencesMap);
+        Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
         final var conversationFinalId = chatId;
         return chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .advisors(a -> a
-
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
                 .stream()
                 .content();
+    }
+
+    private Prompt createUserChatBotPrompt(User user, String chatRequestMessage) {
+        var userChatbotPromptTemplate = new PromptTemplate(userChatbotPromptTemplateResource);
+        var userPreferences = user.getPreferences();
+        //More than 10 variables so using HashMap instead of Map.of
+        Map<String, Object> userPreferencesMap = new LinkedHashMap<>();
+        userPreferencesMap.put("supportStyle", userPreferences.getSupportStyle().toString());
+        userPreferencesMap.put("supportStyleDescription", userPreferences.getSupportStyle().getDescription());
+        userPreferencesMap.put("username", user.getUsername());
+        userPreferencesMap.put("language", userPreferences.getLanguage());
+        userPreferencesMap.put("userAge", userPreferences.getAge());
+        userPreferencesMap.put("userGender", userPreferences.getGender());
+        userPreferencesMap.put("timeZone", user.getTimezone());
+        userPreferencesMap.put("currentStreak", user.getCurrentStreak());
+        userPreferencesMap.put("longestStreak", user.getLongestStreak());
+
+        userPreferencesMap.put("lastJournalEntryDate", user.getLastJournalEntryDate() != null ? user.getLastJournalEntryDate().atZone(ZoneId.of(user.getTimezone())).toString() : "null");
+        userPreferencesMap.put("lastReportAt", user.getLastReportAt() != null ? user.getLastReportAt() : "null");
+        //Each user is forced to have a next Report on because when they register this field is registered
+        userPreferencesMap.put("nextReportOn", user.getNextReportOn().atZone(ZoneId.of(user.getTimezone())).toString());
+        userPreferencesMap.put("userMessage", chatRequestMessage);
+        return userChatbotPromptTemplate.create(userPreferencesMap);
     }
 
     private String createConversation(String userId) {
