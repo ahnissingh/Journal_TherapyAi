@@ -1,10 +1,14 @@
 package com.ahnis.journalai;
 
+import com.ahnis.journalai.notification.service.NotificationService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,12 +34,17 @@ import java.util.TimeZone;
 @EnableMongoAuditing
 @ConfigurationPropertiesScan
 @EnableScheduling
+
 public class JournalAi2Application {
-    //todo reports crud api
+
+
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        //todo dont remove this is actually being used
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
         SpringApplication.run(JournalAi2Application.class, args);
+
+
     }
 }
 

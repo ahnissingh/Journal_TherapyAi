@@ -32,7 +32,6 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {

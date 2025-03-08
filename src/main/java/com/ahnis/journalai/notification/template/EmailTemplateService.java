@@ -18,7 +18,7 @@ public class EmailTemplateService {
     public String generateMoodReportEmail(MoodReportResponse report) {
         var context = new Context();
         context.setVariable("report", report);
-        return templateEngine.process("mood-report-email", context);
+        return templateEngine.process("email/mood-report-email", context);
     }
 
     public String generatePasswordResetEmail(String token) {
@@ -30,7 +30,7 @@ public class EmailTemplateService {
         log.info("token for password reset email in Email Template service {}", token);
 
         context.setVariable("resetUrl", resultUrl);
-        return templateEngine.process("password-reset-email", context);
+        return templateEngine.process("email/password-reset-email", context);
 
     }
 
@@ -38,7 +38,7 @@ public class EmailTemplateService {
         var context = new Context();
         var journalUrl = appProperties.getBaseUrl() + "/journal";
         context.setVariable("journalUrl", journalUrl);
-        return templateEngine.process("journal-reminder-email", context);
+        return templateEngine.process("email/journal-reminder-email", context);
     }
 
     public String generateMilestoneNotificationEmail(String userName, int streak) {
@@ -47,7 +47,7 @@ public class EmailTemplateService {
         context.setVariable("userName", userName);
         context.setVariable("streak", streak);
         context.setVariable("journalUrl", journalUrl);
-        return templateEngine.process("milestone-notification-email", context);
+        return templateEngine.process("email/milestone-notification-email", context);
     }
 
 }
