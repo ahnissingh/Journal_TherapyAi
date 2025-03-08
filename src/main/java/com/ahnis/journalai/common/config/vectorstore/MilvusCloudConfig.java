@@ -15,7 +15,6 @@ public class MilvusCloudConfig {
                         .withUri(cloudProperties.getUri())
                         .withToken(cloudProperties.getToken())
                         .withAuthorization(cloudProperties.getUsername(), cloudProperties.getPassword())
-
                         .build()
         );
     }
