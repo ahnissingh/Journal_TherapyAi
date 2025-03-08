@@ -10,6 +10,7 @@ import org.mapstruct.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -22,6 +23,11 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "preferences", source = "preferences")
     @Mapping(target = "nextReportOn", ignore = true)
+    @Mapping(target = "currentStreak", ignore = true) // Ignored during registration
+    @Mapping(target = "longestStreak", ignore = true) // Ignored during registration
+    @Mapping(target = "lastJournalEntryDate", ignore = true)
+
+        // Ignored during registration
         //nextReportOn is calculated in service
     User toEntity(UserRegistrationRequest dto);
 
@@ -29,8 +35,7 @@ public interface UserMapper {
     PreferencesRequest toPreferencesDto(Preferences preferences);
 
     Preferences toPreferencesEntity(PreferencesRequest preferencesRequest);
-
-//    User -> UserResponse
+    //    User -> UserResponse
     @Mapping(target = "id", source = "id")
     @Mapping(target = "username", source = "username")
     @Mapping(target = "email", source = "email")
@@ -39,24 +44,10 @@ public interface UserMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "nextReportOn", source = "nextReportOn")
+    @Mapping(target = "currentStreak", source = "currentStreak")
+    @Mapping(target = "longestStreak", source = "longestStreak")
+    @Mapping(target = "lastJournalEntryDate", source = "lastJournalEntryDate")
     UserResponse toResponseDto(User user);
 
-//    @Mapping(target = "id", source = "id")
-//    @Mapping(target = "username", source = "username")
-//    @Mapping(target = "email", source = "email")
-//    @Mapping(target = "roles", source = "roles")
-//    @Mapping(target = "preferences", source = "preferences")
-//    @Mapping(target = "createdAt", expression = "java(convertInstantToZonedDateTime(user.getCreatedAt(), timezone))")
-//    @Mapping(target = "updatedAt", expression = "java(convertInstantToZonedDateTime(user.getUpdatedAt(), timezone))")
-//    @Mapping(target = "nextReportOn", expression = "java(convertInstantToZonedDateTime(user.getNextReportOn(), timezone))")
-//    @Mapping(target = "lastReportAt", expression = "java(user.getLastReportAt() == null ? null : convertInstantToZonedDateTime(user.getLastReportAt(), timezone))")
-//    UserResponse toResponseDto(User user, @Context String timezone);
-//
-//    default ZonedDateTime convertInstantToZonedDateTime(Instant instant, String timezone) {
-//        if (instant == null || timezone == null) {
-//            return null;
-//        }
-//        return instant.atZone(ZoneId.of(timezone));
-//    }
 
 }

@@ -29,7 +29,6 @@ public class Journal {
     private Instant createdAt;
     @LastModifiedDate
     private Instant modifiedAt;
-
     @Indexed
     private String userId; //added index for user id
 }

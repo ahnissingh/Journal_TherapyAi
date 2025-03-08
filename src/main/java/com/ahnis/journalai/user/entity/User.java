@@ -75,6 +75,13 @@ public class User implements UserDetails {
 
     private Instant updatedAt;
 
+    //Streaks ke liye
+    //Fields also in userResponse
+    private int currentStreak; // Current consecutive days of journal writing
+    private int longestStreak; // Longest streak achieved
+    private Instant lastJournalEntryDate; // Date of the last journal entry
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()

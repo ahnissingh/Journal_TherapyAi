@@ -4,13 +4,6 @@ spring:
       uri: ${MONGO_ATLAS_URL}
       auto-index-creation: true
       database: journal_ai
-  #      authentication-database: admin
-  #      database: journal_ai
-  #      username: ${MONGO_DB_USERNAME}
-  #      password: ${MONGO_DB_PASSWORD}
-  #      host: journal-mongodb  #Change to env
-  #      port: 27017 #change to env
-
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -25,19 +18,18 @@ spring:
   threads:
     virtual:
       enabled: true
-
   main:
     allow-bean-definition-overriding: true
-
 email:
   sendgrid:
     config:
       apiKey: ${SENDGRID_API_KEY}
-
+      fromEmail: "ahnisaneja@gmail.com"
+app:
+  base-url: "http://localhost:8080"
 security:
   allowedOrigins:
     - "http://localhost:63342"
-
 
 jwt:
   secret: ${JWT_SECRET_KEY}
@@ -78,7 +70,7 @@ management:
 logging:
   level:
     com.sendgrid.*: debug
-    org.springframework.scheduling.annotation: TRACE
+    #    org.springframework.scheduling.annotation: TRACE
     org.springframework.*: debug
     com.datastax.oss: debug
     org.bson.*: debug
@@ -87,16 +79,16 @@ logging:
 
 milvus:
   cloud:
-    uri: ${MILVUS_CLOUD_URI} # Zilliz Cloud endpoint
-    token: ${MILVUS_CLOUD_TOKEN} # Zilliz Cloud API key
-    username: ${MILVUS_CLOUD_USERNAME} # Zilliz Cloud username
-    password: ${MILVUS_CLOUD_PASSWORD} # Zilliz Cloud password
+    uri: ${MILVUS_CLOUD_URI}
+    token: ${MILVUS_CLOUD_TOKEN}
+    username: ${MILVUS_CLOUD_USERNAME}
+    password: ${MILVUS_CLOUD_PASSWORD}
 
 vector:
   store:
-    database-name: ${VECTOR_STORE_DATABASE_NAME:default} # Default: "default"
-    collection-name: ${VECTOR_STORE_COLLECTION_NAME:vector_store1} # Default: "vector_store"
-    metric-type: ${VECTOR_STORE_METRIC_TYPE:COSINE} # Default: "COSINE"
-    index-type: ${VECTOR_STORE_INDEX_TYPE:IVF_FLAT} # Default: "IVF_FLAT"
-    embedding-dimension: ${VECTOR_STORE_EMBEDDING_DIMENSION:1536} # Default: 1536
-    initialize-schema: ${VECTOR_STORE_INITIALIZE_SCHEMA:true} # Default: true
+    database-name: ${VECTOR_STORE_DATABASE_NAME:default}
+    collection-name: ${VECTOR_STORE_COLLECTION_NAME:vector_store1}
+    metric-type: ${VECTOR_STORE_METRIC_TYPE:COSINE}
+    index-type: ${VECTOR_STORE_INDEX_TYPE:IVF_FLAT}
+    embedding-dimension: ${VECTOR_STORE_EMBEDDING_DIMENSION:1536}
+    initialize-schema: ${VECTOR_STORE_INITIALIZE_SCHEMA:true}

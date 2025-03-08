@@ -20,7 +20,9 @@ public record UserResponse(
         Instant nextReportOn,
         Instant lastReportAt,// nullable (absent for new users)
         Instant createdAt,
-
-        Instant updatedAt
+        Instant updatedAt,
+        int currentStreak,// Current consecutive days of journal writing
+        int longestStreak, // Longest streak achieved
+        Instant lastJournalEntryDate // Date of the last journal entry
 ) {
 }

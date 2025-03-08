@@ -1,4 +1,5 @@
 package com.ahnis.journalai.user.entity;
+
 import com.ahnis.journalai.user.enums.*;
 import lombok.*;
 
@@ -17,5 +18,6 @@ public class Preferences {
     private SupportStyle supportStyle;
     private Integer age;
     private Gender gender;
+    private boolean remindersEnabled;
 
 }

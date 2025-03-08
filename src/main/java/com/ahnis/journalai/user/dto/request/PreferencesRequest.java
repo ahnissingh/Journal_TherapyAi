@@ -1,14 +1,12 @@
 package com.ahnis.journalai.user.dto.request;
 
 
-
 import com.ahnis.journalai.user.enums.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-//todo migrate Validation values to config
 public record PreferencesRequest(
 
         @NotNull(message = "Therapy Frequency is required")
@@ -24,7 +22,7 @@ public record PreferencesRequest(
         @Max(value = 120, message = "Age must be less than or equal to 120")
         Integer age,
         @NotNull(message = "Gender is required")
-        Gender gender
-) {
-
-}
+        Gender gender,
+        @NotNull(message = "remindersEnabled is required. Set to false if not required")
+        boolean remindersEnabled
+) { }

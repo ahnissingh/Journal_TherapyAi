@@ -7,19 +7,28 @@ import com.ahnis.journalai.journal.exception.JournalNotFoundException;
 import com.ahnis.journalai.journal.mapper.JournalMapper;
 import com.ahnis.journalai.journal.repository.JournalRepository;
 import com.ahnis.journalai.journal.embedding.JournalEmbeddingService;
+import com.ahnis.journalai.user.entity.User;
+import com.ahnis.journalai.user.exception.UserNotFoundException;
+import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JournalServiceImpl implements JournalService {
     private final JournalRepository journalRepository;
     private final JournalEmbeddingService journalEmbeddingService;
     private final JournalMapper journalMapper;
+    private final UserRepository userRepository;
 
     @Override
     @Async
@@ -29,6 +38,7 @@ public class JournalServiceImpl implements JournalService {
         //Save the journal and pass it for embedding
         Journal savedJournal = journalRepository.save(journal);
         journalEmbeddingService.saveJournalEmbeddings(savedJournal);
+        updateUsersStreak(userId);
     }
 
     @Override
@@ -67,10 +77,53 @@ public class JournalServiceImpl implements JournalService {
         validateJournalOwnership(journal, userId);
         journalRepository.delete(journal);
         journalEmbeddingService.deleteJournalEmbeddings(id);
+
     }
+
 
     private void validateJournalOwnership(Journal journal, String userId) {
         if (!journal.getUserId().equals(userId))
             throw new JournalNotFoundException("Journal not found");
     }
+
+
+
+    private void updateUsersStreak(String userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found", userId));
+        Instant now = Instant.now();
+        Instant lastJournalEntryDate = user.getLastJournalEntryDate();
+        if (lastJournalEntryDate != null && isYesterday(lastJournalEntryDate, now)) {
+            user.setCurrentStreak(user.getCurrentStreak() + 1);
+
+        } else {
+            user.setCurrentStreak(1);
+        }
+        user.setLastJournalEntryDate(now);
+        // Update longestStreak if currentStreak exceeds it
+        if (user.getCurrentStreak() > user.getLongestStreak()) {
+            user.setLongestStreak(user.getCurrentStreak());
+        }
+        checkForMilestones(user);
+        userRepository.save(user);
+    }
+
+    private boolean isYesterday(Instant lastEntryDate, Instant now) {
+        LocalDate lastEntryLocalDate = lastEntryDate.atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate nowLocalDate = now.atZone(ZoneId.systemDefault()).toLocalDate();
+        return lastEntryLocalDate.plusDays(1).isEqual(nowLocalDate);
+    }
+
+    private void checkForMilestones(User user) {
+        int currentStreak = user.getCurrentStreak();
+        if (currentStreak == 3 || currentStreak == 7 || currentStreak == 14 || currentStreak == 30) {
+            sendMilestoneNotification(user, currentStreak);
+        }
+    }
+
+    private void sendMilestoneNotification(User user, int streak) {
+        // Log the milestone (replace with actual notification logic)
+        log.info("Congratulations! User {} has reached a {}-day streak!", user.getEmail(), streak);
+    }
+
 }

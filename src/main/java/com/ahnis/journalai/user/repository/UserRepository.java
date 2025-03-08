@@ -82,4 +82,8 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ 'username' : ?0 }")
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
     long updateNextReportOnByUsername(String username, Instant nextReportOn);
+
+
+    @Query("{ 'preferences.remindersEnabled': ?0 }")
+    List<User> findByRemindersEnabled(boolean remindersEnabled);
 }

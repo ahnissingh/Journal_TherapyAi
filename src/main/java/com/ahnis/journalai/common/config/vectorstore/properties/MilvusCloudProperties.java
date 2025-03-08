@@ -7,12 +7,12 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Getter
 @Configuration
-@ConfigurationProperties(prefix = "milvus.cloud") // Prefix for environment variables
+@ConfigurationProperties(prefix = "milvus.cloud")
 public class MilvusCloudProperties {
 
-    private String uri; // MILVUS_CLOUD_URI
-    private String token; // MILVUS_CLOUD_TOKEN
-    private String username; // MILVUS_CLOUD_USERNAME
-    private String password; // MILVUS_CLOUD_PASSWORD
+    private String uri;
+    private String token;
+    private String username;
+    private String password;
 
 }

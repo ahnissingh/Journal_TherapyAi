@@ -1,0 +1,38 @@
+Workflow
+1. User Writes a Journal
+
+    User writes a journal → Journal is saved in the Journal collection.
+
+    Update the User collection:
+
+        Add the journal's date to journalDates (if not already present).
+
+        Recalculate currentStreak and longestStreak.
+
+        Update lastJournalEntryDate.
+
+2. User Deletes a Journal
+
+    User deletes a journal → Journal is removed from the Journal collection.
+
+    Update the User collection:
+
+        Check if the deleted journal was the last one for its date.
+
+        If yes, remove the date from journalDates and recalculate streaks.
+
+3. Daily Reminder Job
+
+    Scheduler runs daily at 7 AM.
+
+    For each user:
+
+        Check if lastJournalEntryDate is today (in the user's timezone).
+
+        If not, send a reminder.
+
+4. Display Streak History
+
+    Fetch the journalDates set from the User collection.
+
+    Display a calendar-like view of the user's journaling history.
