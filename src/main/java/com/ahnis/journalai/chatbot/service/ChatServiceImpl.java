@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -62,6 +63,13 @@ public class ChatServiceImpl implements ChatService {
 
                     Do not include any explanations or notes about the process—only provide the response.
                     """;
+    private static final String DEFAULT_SYSTEM_TEXT_ADVISE_VECTOR_CHAT_MEMORY = """
+            Use the long term conversation memory from the LONG_TERM_MEMORY section to provide accurate answers.
+            ---------------------
+            LONG_TERM_MEMORY:
+            {long_term_memory}
+            ---------------------
+            """;
 
     public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
         this.chatClient = chatClient
@@ -69,9 +77,9 @@ public class ChatServiceImpl implements ChatService {
                         SearchRequest.builder()
                                 .topK(4)
                                 .build(), CUSTOM_USER_TEXT_ADVISE
-
                 ))
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
+                .defaultAdvisors(new VectorStoreChatMemoryAdvisor(vectorStore, DEFAULT_SYSTEM_TEXT_ADVISE_VECTOR_CHAT_MEMORY))
                 .build();
 
 
@@ -91,7 +99,10 @@ public class ChatServiceImpl implements ChatService {
                 .advisors(a -> a
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
+                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30)
+                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
+                )
+
                 .call()
                 .content();
 
@@ -112,6 +123,7 @@ public class ChatServiceImpl implements ChatService {
                 .advisors(a -> a
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
+                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)//so that I can always query vector store by user id everywhere for example in reports
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
                 .stream()
                 .content();
