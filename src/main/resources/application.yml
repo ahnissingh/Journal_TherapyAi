@@ -1,4 +1,7 @@
 spring:
+  devtools:
+    livereload:
+      enabled: true #Disable in production todo refactor this file into seperate profiles
   data:
     mongodb:
       uri: ${MONGO_ATLAS_URL}

@@ -25,15 +25,11 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-docker-compose</artifactId>-->
-        <!--        </dependency>-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -128,29 +124,7 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.5</version>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+
 
     <dependencyManagement>
         <dependencies>
@@ -165,35 +139,7 @@
     </dependencyManagement>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>0.10.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <buildArgs>
-                        <buildArg>--initialize-at-build-time=com.fasterxml.jackson.core.Base64Variant</buildArg>
-                        <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
-                        <buildArg>--initialize-at-build-time=com.azure.core.util.logging.ClientLogger</buildArg>
-                        <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
-                        <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
-                        <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
-                        <buildArg>--initialize-at-build-time=ch.qos.logback</buildArg>
-                        <buildArg>--initialize-at-build-time=com.fasterxml.jackson</buildArg>
-                        <buildArg>--initialize-at-build-time=org.codehaus</buildArg>
-                        <buildArg>--initialize-at-build-time=org.apache.xerces</buildArg>
-                        <buildArg>--add-exports=jdk.internal.vm.ci/jdk.vm.ci.services=ALL-UNNAMED</buildArg>
-                        <buildArg>--initialize-at-build-time=org.apache.xerces</buildArg>
-                        <buildArg>--initialize-at-build-time=org.slf4j</buildArg>
-                    </buildArgs>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -231,6 +177,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
             </plugin>
         </plugins>
     </build>
