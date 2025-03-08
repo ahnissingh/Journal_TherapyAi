@@ -1,5 +1,6 @@
 package com.ahnis.journalai;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,6 +9,12 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAccessor;
+import java.util.Date;
 import java.util.TimeZone;
 
 
@@ -18,18 +25,17 @@ import java.util.TimeZone;
  * todo 5) i When finalised project add @ConfigurationPropertiesScan classes or packages
  *        ii Use Mapper Scan for all map struct interfaces
  */
+@Slf4j
 @SpringBootApplication(exclude = MilvusVectorStoreAutoConfiguration.class)
 @EnableMongoAuditing
 @ConfigurationPropertiesScan
 @EnableScheduling
-
 public class JournalAi2Application {
     //todo reports crud api
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
         SpringApplication.run(JournalAi2Application.class, args);
-
     }
 }
 

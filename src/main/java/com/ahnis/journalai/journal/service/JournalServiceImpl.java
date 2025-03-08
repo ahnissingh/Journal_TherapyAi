@@ -7,6 +7,7 @@ import com.ahnis.journalai.journal.exception.JournalNotFoundException;
 import com.ahnis.journalai.journal.mapper.JournalMapper;
 import com.ahnis.journalai.journal.repository.JournalRepository;
 import com.ahnis.journalai.journal.embedding.JournalEmbeddingService;
+import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.repository.UserRepository;
@@ -29,6 +30,7 @@ public class JournalServiceImpl implements JournalService {
     private final JournalEmbeddingService journalEmbeddingService;
     private final JournalMapper journalMapper;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Async
@@ -87,7 +89,6 @@ public class JournalServiceImpl implements JournalService {
     }
 
 
-
     private void updateUsersStreak(String userId) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found", userId));
@@ -116,13 +117,14 @@ public class JournalServiceImpl implements JournalService {
 
     private void checkForMilestones(User user) {
         int currentStreak = user.getCurrentStreak();
-        if (currentStreak == 3 || currentStreak == 7 || currentStreak == 14 || currentStreak == 30) {
+        if (currentStreak == 2 || currentStreak == 3 || currentStreak == 7 || currentStreak == 14 || currentStreak == 30) {
             sendMilestoneNotification(user, currentStreak);
         }
     }
 
     private void sendMilestoneNotification(User user, int streak) {
         // Log the milestone (replace with actual notification logic)
+        notificationService.sendMilestoneNotification(user, streak);
         log.info("Congratulations! User {} has reached a {}-day streak!", user.getEmail(), streak);
     }
 

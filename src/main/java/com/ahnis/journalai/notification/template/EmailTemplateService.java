@@ -34,4 +34,20 @@ public class EmailTemplateService {
 
     }
 
+    public String generateJournalReminderEmail() {
+        var context = new Context();
+        var journalUrl = appProperties.getBaseUrl() + "/journal";
+        context.setVariable("journalUrl", journalUrl);
+        return templateEngine.process("journal-reminder-email", context);
+    }
+
+    public String generateMilestoneNotificationEmail(String userName, int streak) {
+        var context = new Context();
+        var journalUrl = appProperties.getBaseUrl() + "/journal";
+        context.setVariable("userName", userName);
+        context.setVariable("streak", streak);
+        context.setVariable("journalUrl", journalUrl);
+        return templateEngine.process("milestone-notification-email", context);
+    }
+
 }
