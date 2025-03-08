@@ -10,6 +10,7 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,8 +21,9 @@ import java.io.IOException;
 public class SendGridEmailService {
     private final SendGridProperties sendGridProperties;
 
+    @Async
     public void sendEmail(String toEmail, String subject, String content) {
-        var from = new Email("ahnisaneja@gmail.com");
+        var from = new Email(sendGridProperties.fromEmail());
         var to = new Email(toEmail);
         Content emailContent = new Content("text/html", content);
         Mail mail = new Mail(from, subject, to, emailContent);

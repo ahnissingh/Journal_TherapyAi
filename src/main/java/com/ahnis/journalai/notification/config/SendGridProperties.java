@@ -9,14 +9,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public record SendGridProperties(
         @NotBlank(message = "SendGrid API key must not be blank")
-        String apiKey
-//        @Email(message = "From email must be valid")
-//        @NotBlank(message = "From email must not be blank")
-//        String fromEmail,
-//
-//        @NotBlank(message = "From name must not be blank")
-//        String fromName
-
+        String apiKey,
+        @Email(message = "From email must be valid")
+        @NotBlank(message = "From email must not be blank")
+        String fromEmail
 ) {
 }
 

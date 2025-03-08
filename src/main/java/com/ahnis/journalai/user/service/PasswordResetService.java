@@ -1,24 +1,16 @@
 package com.ahnis.journalai.user.service;
 
+import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.PasswordResetToken;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.repository.PasswordResetTokenRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
-import com.sendgrid.*;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -30,17 +22,8 @@ public class PasswordResetService {
 
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserRepository userRepository;
-    private final TemplateEngine templateEngine;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.base-url}")
-    private String baseUrl;
-
-    @Value("${email.sendgrid.config.apiKey}")
-    private String sendGridApiKey;
-
-    @Value("${email.sendgrid.config.fromEmail}")
-    private String fromEmail;
+    private final NotificationService notificationService;
 
     // Generate a token and send an email
     public void sendPasswordResetEmail(String userEmail) {
@@ -60,48 +43,13 @@ public class PasswordResetService {
         passwordResetTokenRepository.save(resetToken);
 
         // Send the email
-        sendEmail(user.getEmail(), token);
+        notificationService.sendEmailPasswordReset(user.getEmail(), token);
     }
 
-    //todo refactor to use already built service classes
-    // Send the email using SendGrid
-    @Async
-    void sendEmail(String toEmail, String token) {
-        Email from = new Email(fromEmail);
-        Email to = new Email(toEmail);
-        String subject = "Password Reset Request";
-
-        // Create the Thymeleaf context and set variables
-        Context context = new Context();
-        context.setVariable("resetUrl", baseUrl + "/api/v1/auth/reset-password?token=" + token);
-
-        // Process the Thymeleaf template
-        String htmlContent = templateEngine.process("password-reset-email", context);
-
-        Content content = new Content("text/html", htmlContent);
-        Mail mail = new Mail(from, subject, to, content);
-
-        SendGrid sg = new SendGrid(sendGridApiKey);
-        Request request = new Request();
-        try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            Response response = sg.api(request);
-            System.out.println("Email sent. Status: " + response.getStatusCode());
-        } catch (IOException ex) {
-            log.info("Exception occurred while sending token email", ex);
-        }
-    }
-
-    // Validate the token
-    public boolean validateToken(String token) {
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("Token not found"));
-        return resetToken != null && !resetToken.getExpiryDate().isBefore(Instant.now()); // Token is invalid or expired
-    }
 
     // Reset the password
     public void resetPassword(String token, String newPassword) {
+        //validate the token and ownership
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("Token not found"));
 
         if (resetToken.getExpiryDate().isBefore(Instant.now()))
