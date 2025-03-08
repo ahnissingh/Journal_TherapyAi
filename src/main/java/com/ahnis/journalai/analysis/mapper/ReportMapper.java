@@ -6,11 +6,15 @@ import com.ahnis.journalai.analysis.entity.MoodReportEntity;
 import com.ahnis.journalai.user.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.stereotype.Component;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
-@Component()
-public interface MoodReportMapper {
+
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.WARN
+)
+public interface ReportMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "reportDate", expression = "java(java.time.Instant.now())") // Set reportDate to current time

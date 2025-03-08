@@ -3,13 +3,11 @@ package com.ahnis.journalai.analysis.service;
 import com.ahnis.journalai.analysis.dto.MoodReportApiResponse;
 import com.ahnis.journalai.analysis.dto.MoodReportResponse;
 import com.ahnis.journalai.analysis.exception.ReportNotFoundException;
-import com.ahnis.journalai.analysis.mapper.MoodReportMapper;
+import com.ahnis.journalai.analysis.mapper.ReportMapper;
 import com.ahnis.journalai.analysis.repository.ReportRepository;
 import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.User;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +17,19 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ReportService {
     private final JournalAnalysisService journalAnalysisService;
     private final ReportRepository reportRepository;
     private final NotificationService notificationService;
-    @Qualifier("moodReportMapper")
-    private final MoodReportMapper reportMapper;
+    private final ReportMapper reportMapper;
+
+    public ReportService(JournalAnalysisService journalAnalysisService, ReportRepository reportRepository, NotificationService notificationService,
+                         ReportMapper reportMapper) {
+        this.journalAnalysisService = journalAnalysisService;
+        this.reportRepository = reportRepository;
+        this.notificationService = notificationService;
+        this.reportMapper = reportMapper;
+    }
 
     @Async
     public void sendReport(User user, MoodReportResponse report) {
