@@ -73,7 +73,7 @@ public class PasswordResetService {
 
         // Create the Thymeleaf context and set variables
         Context context = new Context();
-        context.setVariable("resetUrl", baseUrl + "api/v1/auth/reset-password?token=" + token);
+        context.setVariable("resetUrl", baseUrl + "/api/v1/auth/reset-password?token=" + token);
 
         // Process the Thymeleaf template
         String htmlContent = templateEngine.process("password-reset-email", context);
