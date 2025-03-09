@@ -54,20 +54,28 @@ public class ReportScheduler {
                 Instant lastReportAt = user.getLastReportAt();
                 Instant nextReportOn = user.getNextReportOn();
 
-                userRepository.updateLastReportAtById(user.getId(), nextReportOn);
                 Instant newNextReportOn = calculateNextReportOn(nextReportOn, user.getPreferences().getReportFrequency());
-                userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
                 //EDGE CASES
                 //Existing user with last report generated
                 if (lastReportAt != null) {
                     // For subsequent reports, using lastReportAt as the start date
+                    //user reg on 23 feb  and first report on 2nd march                  (28 days in feb)
+                    //eg last report was on 2nd march and today is 9th
+                    //so generate report from 2nd till 9th
                     reportService.generateReport(user, lastReportAt, nextReportOn);
                 } else {
                     //EDGE CASE New user using registration date as start date
+                    //last report is null so user2 registers at  say 2march
+                    //today is 9th march then first report so send report from 2nd till 9th
                     Instant registrationDate = user.getCreatedAt();
                     reportService.generateReport(user, registrationDate, nextReportOn);
                 }
                 log.info("Report generated and dates updated for user: {}", user.getUsername());
+                //update last reportAt to today(nextReportOn)
+                userRepository.updateLastReportAtById(user.getId(), nextReportOn);
+                userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
+                log.info("LastReportAt and NextReportAt fields updated for user {} ", user.getUsername());
+
             } catch (Exception e) {
                 log.error("Failed to generate report for user: {}", user.getUsername(), e);
             }
