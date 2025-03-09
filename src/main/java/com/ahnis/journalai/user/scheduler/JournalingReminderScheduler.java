@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -53,4 +53,6 @@ public class JournalingReminderScheduler {
         // Check karo ki last journal aaj ka hai ya nahi (user ke local timezone mein)
         return !lastJournalDateUserLocal.isEqual(todayUserLocal);
     }
+
+
 }

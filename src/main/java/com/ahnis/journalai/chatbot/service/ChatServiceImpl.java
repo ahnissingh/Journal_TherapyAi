@@ -1,6 +1,5 @@
 package com.ahnis.journalai.chatbot.service;
 
-import com.ahnis.journalai.chatbot.config.ChatAdviceConstants;
 import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
@@ -8,7 +7,6 @@ import com.ahnis.journalai.user.entity.User;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.client.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -65,17 +63,9 @@ public class ChatServiceImpl implements ChatService {
      */
 
     public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
-//        this.chatClient = chatClient
-//                .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
-//                        SearchRequest.builder()
-//                                .topK(2)
-//                                .build(), ChatAdviceConstants.QUESTION_ANSWER_ADVISOR_PROMPT
-//                ))
-//                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-//                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(vectorStore).systemTextAdvise(ChatAdviceConstants.VECTOR_CHAT_ADVISOR_PROMPT).build())
-//                .build();
+
         this.chatClient = chatClient.defaultAdvisors(List.of(
-                new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(2).build()),
+                new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(3).build()),
 //                VectorStoreChatMemoryAdvisor.builder(vectorStore).build(),
                 new MessageChatMemoryAdvisor(chatMemory)
         )).build();
@@ -102,9 +92,9 @@ public class ChatServiceImpl implements ChatService {
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .advisors(a -> a
-                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
+                                .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
+                                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
+                                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
 //                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
 //                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4)
 

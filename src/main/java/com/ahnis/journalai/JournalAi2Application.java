@@ -5,10 +5,16 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,8 +41,16 @@ import java.util.TimeZone;
 @ConfigurationPropertiesScan
 @EnableScheduling
 
+@Configuration
 public class JournalAi2Application {
-
+//    @Bean
+//    public ChatClient chatClient(){
+//        return ChatClient.builder(OpenAiChatModel.builder()
+//                .defaultOptions(OpenAiChatOptions.builder()
+//                        .model(OpenAiApi.ChatModel.GPT_3_5_TURBO)
+//                        .build())
+//        )
+//    }
 
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);

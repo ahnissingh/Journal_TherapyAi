@@ -43,7 +43,7 @@ public class PasswordResetService {
         passwordResetTokenRepository.save(resetToken);
 
         // Send the email
-        notificationService.sendEmailPasswordReset(user.getEmail(), token);
+        notificationService.sendEmailPasswordReset(userEmail, token);
     }
 
 

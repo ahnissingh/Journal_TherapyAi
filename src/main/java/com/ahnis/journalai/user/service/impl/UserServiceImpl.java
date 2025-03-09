@@ -28,6 +28,12 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    @Transactional
+    public void updateUserReportDates(User user, Instant nextReportOn, Instant newNextReportOn) {
+        userRepository.updateLastReportAtById(user.getId(), nextReportOn);
+        userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
+        log.info("LastReportAt and NextReportOn fields updated for user: {}", user.getUsername());
+    }
 
     @Transactional(readOnly = true)
     //OK optimised

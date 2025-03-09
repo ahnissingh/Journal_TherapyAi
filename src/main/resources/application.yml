@@ -91,6 +91,8 @@ milvus:
     password: ${MILVUS_CLOUD_PASSWORD}
 
 vector:
+  batching:
+    enabled: false
   store:
     database-name: ${VECTOR_STORE_DATABASE_NAME:default}
     collection-name: ${VECTOR_STORE_COLLECTION_NAME:vector_store1}
