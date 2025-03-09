@@ -14,7 +14,7 @@
     <description>JournalAi2</description>
     <properties>
         <java.version>23</java.version>
-        <spring-ai.version>1.0.0-M5</spring-ai.version>
+        <spring-ai.version>1.0.0-M6</spring-ai.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <lombok.version>1.18.32</lombok.version>
     </properties>

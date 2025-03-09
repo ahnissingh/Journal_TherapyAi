@@ -6,16 +6,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
 public class JournalAnalysisServiceImpl implements JournalAnalysisService {
     private final ChatModel chatModel;
     private final VectorStore vectorStore;
-
 
     @Async
     @Override
@@ -56,13 +60,13 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
 
         // Step 6: Parse the response into a MoodReport object
         BeanOutputConverter<MoodReportResponse> outputConverter = new BeanOutputConverter<>(MoodReportResponse.class);
-        MoodReportResponse moodReportResponse = outputConverter.convert(response.getResult().getOutput().getContent());
+        MoodReportResponse moodReportResponse = outputConverter.convert(response.getResult().getOutput().getText());
 
         // Step 7: Return completed future
         return CompletableFuture.completedFuture(moodReportResponse);
     }
 
-    private static  String generatePromptForUser(String username, Preferences userPreferences) {
+    private static String generatePromptForUser(String username, Preferences userPreferences) {
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
                 DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.

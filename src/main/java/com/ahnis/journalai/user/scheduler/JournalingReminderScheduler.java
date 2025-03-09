@@ -23,7 +23,7 @@ public class JournalingReminderScheduler {
         log.info("Running journaling reminder scheduler...");
         userRepository.findByRemindersEnabled(true)
                 .stream()
-                .filter(this::hasUserNotWrittenJournalToday) // Filter users who haven't journaled today
+                .filter(this::hasUserNotWrittenJournalToday)
                 .forEach(user -> {
                     notificationService.sendEmailJournalReminder(user.getEmail());
                     log.info("Journaling email reminder is being sent to {}.", user.getEmail());

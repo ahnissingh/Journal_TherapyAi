@@ -8,10 +8,12 @@ import com.ahnis.journalai.user.entity.User;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,7 +73,7 @@ public class ChatServiceImpl implements ChatService {
                                 .build(), ChatAdviceConstants.QUESTION_ANSWER_ADVISOR_PROMPT
                 ))
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-                .defaultAdvisors(new VectorStoreChatMemoryAdvisor(vectorStore, ChatAdviceConstants.VECTOR_CHAT_ADVISOR_PROMPT))
+                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(vectorStore).systemTextAdvise(ChatAdviceConstants.VECTOR_CHAT_ADVISOR_PROMPT).build())
                 .build();
     }
 
@@ -184,3 +187,4 @@ public class ChatServiceImpl implements ChatService {
         return conversationId.startsWith(userId + ":");
     }
 }
+

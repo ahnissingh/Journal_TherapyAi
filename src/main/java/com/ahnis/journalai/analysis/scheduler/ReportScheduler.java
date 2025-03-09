@@ -13,15 +13,11 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-
 import static com.ahnis.journalai.user.util.UserUtils.calculateNextReportOn;
-
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-//todo note query ke time utc me convert karke query karo
-//todo save ke time mongodb automatically utc me kardega
 public class ReportScheduler {
     private final UserRepository userRepository;
     private final ReportService reportService;
@@ -31,7 +27,7 @@ public class ReportScheduler {
     //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
 
 
-    @Scheduled(cron = "0 54 02 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 18 05 * * ?", zone = "Asia/Kolkata")
     public void checkForReports() {
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);
