@@ -1,5 +1,0 @@
- Use the long term conversation memory from the LONG_TERM_MEMORY section to provide accurate answers.
-            ---------------------
-            LONG_TERM_MEMORY:
-            {long_term_memory}
-            ---------------------

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import static com.ahnis.journalai.user.util.UserUtils.calculateNextReportOn;
 
 @Component
@@ -56,8 +57,16 @@ public class ReportScheduler {
                 userRepository.updateLastReportAtById(user.getId(), nextReportOn);
                 Instant newNextReportOn = calculateNextReportOn(nextReportOn, user.getPreferences().getReportFrequency());
                 userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
-                if (lastReportAt != null) reportService.generateReport(user, lastReportAt, nextReportOn);
-                else reportService.generateReport(user, nextReportOn, newNextReportOn);
+                //EDGE CASES
+                //Existing user with last report generated
+                if (lastReportAt != null) {
+                    // For subsequent reports, using lastReportAt as the start date
+                    reportService.generateReport(user, lastReportAt, nextReportOn);
+                } else {
+                    //EDGE CASE New user using registration date as start date
+                    Instant registrationDate = user.getCreatedAt();
+                    reportService.generateReport(user, registrationDate, nextReportOn);
+                }
                 log.info("Report generated and dates updated for user: {}", user.getUsername());
             } catch (Exception e) {
                 log.error("Failed to generate report for user: {}", user.getUsername(), e);

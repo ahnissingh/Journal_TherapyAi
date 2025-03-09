@@ -13,18 +13,16 @@ import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,16 +63,22 @@ public class ChatServiceImpl implements ChatService {
      * @param chatMemory  The {@link ChatMemory} used for short-term conversation memory.
      * @param vectorStore The {@link VectorStore} used for long-term conversation memory.
      */
+
     public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
-        this.chatClient = chatClient
-                .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
-                        SearchRequest.builder()
-                                .topK(4)
-                                .build(), ChatAdviceConstants.QUESTION_ANSWER_ADVISOR_PROMPT
-                ))
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(vectorStore).systemTextAdvise(ChatAdviceConstants.VECTOR_CHAT_ADVISOR_PROMPT).build())
-                .build();
+//        this.chatClient = chatClient
+//                .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
+//                        SearchRequest.builder()
+//                                .topK(2)
+//                                .build(), ChatAdviceConstants.QUESTION_ANSWER_ADVISOR_PROMPT
+//                ))
+//                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
+//                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(vectorStore).systemTextAdvise(ChatAdviceConstants.VECTOR_CHAT_ADVISOR_PROMPT).build())
+//                .build();
+        this.chatClient = chatClient.defaultAdvisors(List.of(
+                new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(2).build()),
+//                VectorStoreChatMemoryAdvisor.builder(vectorStore).build(),
+                new MessageChatMemoryAdvisor(chatMemory)
+        )).build();
     }
 
     /**
@@ -100,8 +104,10 @@ public class ChatServiceImpl implements ChatService {
                 .advisors(a -> a
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30)
-                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
+                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
+//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
+//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4)
+
                 )
                 .call()
                 .content();
@@ -132,10 +138,12 @@ public class ChatServiceImpl implements ChatService {
                 .advisors(a -> a
                         .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
                         .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 30))
+//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
+//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4)
+                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 .stream()
-                .content();
+                .content()
+                .onBackpressureBuffer();
     }
 
     /**
@@ -158,7 +166,6 @@ public class ChatServiceImpl implements ChatService {
         userPreferencesMap.put("timeZone", user.getTimezone());
         userPreferencesMap.put("currentStreak", user.getCurrentStreak());
         userPreferencesMap.put("longestStreak", user.getLongestStreak());
-
         userPreferencesMap.put("lastJournalEntryDate", user.getLastJournalEntryDate() != null ? user.getLastJournalEntryDate().atZone(ZoneId.of(user.getTimezone())).toString() : "null");
         userPreferencesMap.put("lastReportAt", user.getLastReportAt() != null ? user.getLastReportAt() : "null");
         userPreferencesMap.put("nextReportOn", user.getNextReportOn().atZone(ZoneId.of(user.getTimezone())).toString());
