@@ -3,7 +3,6 @@ package com.ahnis.journalai.user.util;
 import com.ahnis.journalai.user.enums.ReportFrequency;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
