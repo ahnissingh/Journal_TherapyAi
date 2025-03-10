@@ -1,6 +1,5 @@
 package com.ahnis.journalai.user.mapper;
 
-import com.ahnis.journalai.common.mapper.ObjectIdMapper;
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
@@ -8,15 +7,9 @@ import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
 import org.mapstruct.*;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.WARN,
-        uses = ObjectIdMapper.class
+        unmappedTargetPolicy = ReportingPolicy.WARN
 )
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)

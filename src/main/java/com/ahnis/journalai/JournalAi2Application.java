@@ -1,6 +1,7 @@
 package com.ahnis.journalai;
 
 import com.ahnis.journalai.notification.service.NotificationService;
+import com.ahnis.journalai.notification.service.SendGridEmailService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +41,7 @@ import java.util.TimeZone;
 @EnableMongoAuditing
 @ConfigurationPropertiesScan
 @EnableScheduling
-
 public class JournalAi2Application {
-    //todo 10th march : ID ko ObjectId me convert karo vaarna aggregation queries nai chalegi
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         //todo dont remove this is actually being used
@@ -51,6 +50,7 @@ public class JournalAi2Application {
 
 
     }
+
 }
 
 

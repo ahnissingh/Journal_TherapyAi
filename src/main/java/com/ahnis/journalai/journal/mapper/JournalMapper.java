@@ -1,6 +1,5 @@
 package com.ahnis.journalai.journal.mapper;
 
-import com.ahnis.journalai.common.mapper.ObjectIdMapper;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.journal.entity.Journal;
@@ -8,8 +7,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.WARN,
-        uses = ObjectIdMapper.class
+        unmappedTargetPolicy = ReportingPolicy.WARN
 )
 public interface JournalMapper {
 
