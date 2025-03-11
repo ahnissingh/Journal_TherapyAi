@@ -7,6 +7,7 @@ spring:
       uri: ${MONGO_ATLAS_URL}
       auto-index-creation: true
       database: journal_ai
+
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -45,7 +46,7 @@ jwt:
 #todo move this to dev config not in prod i will have this
 admin:
   vectorstore:
-    clear-collection: false
+    clear-collection: true
   bootstrap:
     enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}   # Default off for safety (dev only)
     resource: ${ADMIN_BOOTSTRAP_RESOURCE:classpath:/bootstrap/users.json}  # Default to classpath, can point to file:// or even http:// if needed (super flexible)

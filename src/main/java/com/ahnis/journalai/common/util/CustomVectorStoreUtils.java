@@ -44,7 +44,7 @@ public final class CustomVectorStoreUtils {
      * Uncomment it only when explicitly required.
      * </p>
      */
-//    @PostConstruct
+    @PostConstruct
     public void dropEntireCollection() {
         log.warn("Dropping entire vector store collection {} (Admin Task)", vectorStoreProperties.getCollectionName());
         milvusClient.dropCollection(
