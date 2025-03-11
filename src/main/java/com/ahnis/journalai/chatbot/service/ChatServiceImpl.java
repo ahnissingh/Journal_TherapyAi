@@ -3,6 +3,7 @@ package com.ahnis.journalai.chatbot.service;
 import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
+import com.ahnis.journalai.chatbot.tools.ChatbotTools;
 import com.ahnis.journalai.user.entity.User;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -48,6 +49,7 @@ import java.util.UUID;
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
+    private final ChatbotTools chatbotTools;
 
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
@@ -62,12 +64,14 @@ public class ChatServiceImpl implements ChatService {
      * @param vectorStore The {@link VectorStore} used for long-term conversation memory.
      */
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore) {
-
+    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore, ChatbotTools chatbotTools) {
         this.chatClient = chatClient.defaultAdvisors(List.of(
-                new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(3).build()),
-                new MessageChatMemoryAdvisor(chatMemory)
-        )).build();
+                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(3).build()),
+                        new MessageChatMemoryAdvisor(chatMemory)
+                ))
+                .defaultTools(chatbotTools)
+                .build();
+        this.chatbotTools = chatbotTools;
     }
 
     /**
@@ -183,4 +187,3 @@ public class ChatServiceImpl implements ChatService {
         return conversationId.startsWith(userId + ":");
     }
 }
-

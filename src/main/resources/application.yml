@@ -1,7 +1,9 @@
 spring:
   devtools:
+    restart:
+      enabled: false
     livereload:
-      enabled: true #Disable in production todo refactor this file into seperate profiles
+      enabled: false #Disable in production todo refactor this file into seperate profiles
   data:
     mongodb:
       uri: ${MONGO_ATLAS_URL}
@@ -46,7 +48,7 @@ jwt:
 #todo move this to dev config not in prod i will have this
 admin:
   vectorstore:
-    clear-collection: true
+    clear-collection: false
   bootstrap:
     enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}   # Default off for safety (dev only)
     resource: ${ADMIN_BOOTSTRAP_RESOURCE:classpath:/bootstrap/users.json}  # Default to classpath, can point to file:// or even http:// if needed (super flexible)

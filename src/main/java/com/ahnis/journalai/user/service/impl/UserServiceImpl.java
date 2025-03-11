@@ -3,6 +3,7 @@ package com.ahnis.journalai.user.service.impl;
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
+import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.UserRepository;
@@ -35,6 +36,13 @@ public class UserServiceImpl implements UserService {
         userRepository.updateLastReportAtById(user.getId(), nextReportOn);
         userRepository.updateNextReportOnById(user.getId(), newNextReportOn);
         log.info("LastReportAt and NextReportOn fields updated for user: {}", user.getUsername());
+    }
+
+    @Override
+    public Preferences getUserPreferencesByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(User::getPreferences)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found " + username));
     }
 
     @Transactional(readOnly = true)
