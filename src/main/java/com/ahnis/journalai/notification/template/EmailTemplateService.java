@@ -1,6 +1,6 @@
 package com.ahnis.journalai.notification.template;
 
-import com.ahnis.journalai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportEmailResponse;
 import com.ahnis.journalai.common.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ public class EmailTemplateService {
     private final SpringTemplateEngine templateEngine;
     private final AppProperties appProperties;
 
-    public String generateMoodReportEmail(MoodReportResponse report) {
+    public String generateMoodReportEmail(MoodReportEmailResponse report) {
         var context = new Context();
         context.setVariable("report", report);
         return templateEngine.process("email/mood-report-email", context);

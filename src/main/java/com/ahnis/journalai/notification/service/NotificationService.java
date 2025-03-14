@@ -1,6 +1,6 @@
 package com.ahnis.journalai.notification.service;
 
-import com.ahnis.journalai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportEmailResponse;
 import com.ahnis.journalai.notification.template.EmailTemplateService;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class NotificationService {
     private final EmailTemplateService emailTemplateService;
 
     @Async
-    public void sendEmailReport(String toEmail, MoodReportResponse reportContent) {
+    public void sendEmailReport(String toEmail, MoodReportEmailResponse reportContent) {
         var subject = "Your Journal Report ";
         var htmlContent = emailTemplateService.generateMoodReportEmail(reportContent);
         sendGridEmailService.sendEmail(toEmail, subject, htmlContent);

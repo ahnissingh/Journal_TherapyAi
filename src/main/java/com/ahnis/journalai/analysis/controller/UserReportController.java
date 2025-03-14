@@ -35,7 +35,6 @@ public class UserReportController {
         MoodReportApiResponse report = reportService.getReportById(user.getId(), reportId);
         return ApiResponse.success(report);
     }
-
     // View the latest report for the authenticated user
     @GetMapping("/latest")
     public ApiResponse<MoodReportApiResponse> getLatestReport(@AuthenticationPrincipal User user) {

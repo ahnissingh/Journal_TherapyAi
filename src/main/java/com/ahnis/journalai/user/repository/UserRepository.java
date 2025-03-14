@@ -2,10 +2,7 @@ package com.ahnis.journalai.user.repository;
 
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
-import org.springframework.data.mongodb.repository.DeleteQuery;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.mongodb.repository.Update;
+import org.springframework.data.mongodb.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -87,6 +84,13 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{ 'preferences.remindersEnabled': ?0 }")
     List<User> findByRemindersEnabled(boolean remindersEnabled);
+    @Aggregation(pipeline = {
+            "{ $match: { nextReportOn: { $gte: ?0, $lt: ?1 } } }", // Filter users with nextReportOn within the current day
+            "{ $lookup: { from: 'journals', localField: 'id', foreignField: 'userId', as: 'journals' } }", // Join with journals collection
+            "{ $match: { journals: { $not: { $size: 0 } } } }", // Filter users with at least one journal
+            "{ $project: { journals: 0 } }" // Exclude journals from the result
+    })
+    List<User> findUsersDueForReportWithJournals(Instant startOfDay, Instant endOfDay);
 
 
 }

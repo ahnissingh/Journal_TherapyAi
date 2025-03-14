@@ -8,6 +8,7 @@ import com.ahnis.journalai.user.repository.PasswordResetTokenRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,7 @@ public class PasswordResetService {
         // Save the token
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
-                .userId(user.getId())
+                .userId(user.getId()) //Field annotation used automatically saved as object id
                 .expiryDate(expiryDate)
                 .build();
         passwordResetTokenRepository.save(resetToken);

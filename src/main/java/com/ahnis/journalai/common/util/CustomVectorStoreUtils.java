@@ -3,6 +3,7 @@ package com.ahnis.journalai.common.util;
 import com.ahnis.journalai.common.config.vectorstore.properties.VectorStoreProperties;
 import io.milvus.client.MilvusClient;
 import io.milvus.param.collection.DropCollectionParam;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

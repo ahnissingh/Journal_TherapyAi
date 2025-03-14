@@ -1,6 +1,7 @@
 package com.ahnis.journalai.analysis.repository;
 
 import com.ahnis.journalai.analysis.entity.MoodReportEntity;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package com.ahnis.journalai.user.mapper;
 
+import com.ahnis.journalai.common.mapper.ObjectIdMapper;
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
@@ -14,7 +15,8 @@ import java.util.Arrays;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.WARN
+        unmappedTargetPolicy = ReportingPolicy.WARN,
+        uses = ObjectIdMapper.class
 )
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)
@@ -35,6 +37,7 @@ public interface UserMapper {
     PreferencesRequest toPreferencesDto(Preferences preferences);
 
     Preferences toPreferencesEntity(PreferencesRequest preferencesRequest);
+
     //    User -> UserResponse
     @Mapping(target = "id", source = "id")
     @Mapping(target = "username", source = "username")

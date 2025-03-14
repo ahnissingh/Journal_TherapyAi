@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 @Slf4j
 @Service
@@ -76,6 +78,7 @@ public class UserServiceImpl implements UserService {
         var currentUser = getUserByUsername(username);
         if (!preferencesRequest.reportFrequency().equals(currentUser.getPreferences().getReportFrequency())) {
             var nextReportOn = UserUtils.calculateNextReportOn(Instant.now(), preferencesRequest.reportFrequency());
+
             userRepository.updateNextReportOnByUsername(username, nextReportOn);
         }
         userRepository.updatePreferencesByUsername(username, userMapper.toPreferencesEntity(preferencesRequest));

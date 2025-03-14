@@ -1,17 +1,15 @@
 package com.ahnis.journalai.journal.mapper;
 
+import com.ahnis.journalai.common.mapper.ObjectIdMapper;
 import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.journal.entity.Journal;
 import org.mapstruct.*;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.WARN
+        unmappedTargetPolicy = ReportingPolicy.WARN,
+        uses = ObjectIdMapper.class
 )
 public interface JournalMapper {
 
@@ -20,6 +18,7 @@ public interface JournalMapper {
     @Mapping(target = "modifiedAt", ignore = true)
     @Mapping(target = "userId", source = "userId")
     Journal toEntity(JournalRequest dto, String userId);
+
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "title", source = "title")

@@ -1,26 +1,22 @@
 package com.ahnis.journalai.analysis.service;
 
-import com.ahnis.journalai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportEmailResponse;
 import com.ahnis.journalai.user.entity.Preferences;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,7 +29,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
 
     @Async
     @Override
-    public CompletableFuture<MoodReportResponse> analyzeUserMood(String userId, String username, Preferences userPreferences, Instant startDate, Instant endDate) {
+    public CompletableFuture<MoodReportEmailResponse> analyzeUserMood(String userId, String username, Preferences userPreferences, Instant startDate, Instant endDate) {
         List<Document> documents = Optional.ofNullable(vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query("mood")
@@ -51,22 +47,20 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         var combinedContent = String.join("\n", contentList);
 
         // Step 4: Create a prompt to analyze the mood
-        //todo fixed key emotions as these refactor into
-        //todo Map<KeyEmotionEnum,String>
-        String promptText = generatePromptForUser(username, userPreferences);
+        String promptText = generatePromptForUser(username, userPreferences, combinedContent);
 
         // Step 5: Send the prompt to the language model (e.g., OpenAI GPT)
         var response = chatModel.call(new Prompt(promptText));
 
         // Step 6: Parse the response into a MoodReport object
-        BeanOutputConverter<MoodReportResponse> outputConverter = new BeanOutputConverter<>(MoodReportResponse.class);
-        MoodReportResponse moodReportResponse = outputConverter.convert(response.getResult().getOutput().getText());
+        BeanOutputConverter<MoodReportEmailResponse> outputConverter = new BeanOutputConverter<>(MoodReportEmailResponse.class);
+        MoodReportEmailResponse moodReportEmailResponse = outputConverter.convert(response.getResult().getOutput().getText());
 
         // Step 7: Return completed future
-        return CompletableFuture.completedFuture(moodReportResponse);
+        return CompletableFuture.completedFuture(moodReportEmailResponse);
     }
 
-    private static String generatePromptForUser(String username, Preferences userPreferences) {
+    private static String generatePromptForUser(String username, Preferences userPreferences, String combinedContent) {
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
                 DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.
@@ -77,15 +71,16 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
                 Keep the language of the report %s and keep the tone for any text %s
                 Do not address the user as 'user' but address them with their username %s use this name STRICTLY ONCE  in the report ONLY at the BEGINNING.
                 Entries:
-                {entries}
+                %s
                 """;
 
-        String format = new BeanOutputConverter<>(MoodReportResponse.class).getFormat();
+        String format = new BeanOutputConverter<>(MoodReportEmailResponse.class).getFormat();
         return String.format(promptTemplate,
-                MoodReportResponse.class.getName(),
+                MoodReportEmailResponse.class.getName(),
                 userPreferences.getLanguage().name(),
                 userPreferences.getSupportStyle().name(),
-                username
+                username,
+                combinedContent
         ) + "\n" + format;
 
     }

@@ -41,17 +41,8 @@ import java.util.TimeZone;
 @ConfigurationPropertiesScan
 @EnableScheduling
 
-@Configuration
 public class JournalAi2Application {
-//    @Bean
-//    public ChatClient chatClient(){
-//        return ChatClient.builder(OpenAiChatModel.builder()
-//                .defaultOptions(OpenAiChatOptions.builder()
-//                        .model(OpenAiApi.ChatModel.GPT_3_5_TURBO)
-//                        .build())
-//        )
-//    }
-
+    //todo 10th march : ID ko ObjectId me convert karo vaarna aggregation queries nai chalegi
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         //todo dont remove this is actually being used

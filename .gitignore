@@ -39,8 +39,5 @@ build/
 
 ### VS Code ###
 .vscode/
-/test users details.txt
-/volumes/
-/volumes/
 /src/main/resources/bootstrap/users.json
 /volumes/

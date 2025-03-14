@@ -4,6 +4,7 @@ import com.ahnis.journalai.user.enums.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -30,11 +31,9 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
 
     @Id
-    private String id;
-
+    private String id; //Automatically to object id
     @Indexed(unique = true)
     private String username;
-
     @Indexed(unique = true)
     private String email;
     @JsonIgnore
@@ -43,7 +42,6 @@ public class User implements UserDetails {
 
     private Preferences preferences;
 
-  
     @Indexed
     private Instant nextReportOn;
 

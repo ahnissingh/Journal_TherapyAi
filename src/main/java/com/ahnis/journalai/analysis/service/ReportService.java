@@ -1,13 +1,14 @@
 package com.ahnis.journalai.analysis.service;
 
 import com.ahnis.journalai.analysis.dto.MoodReportApiResponse;
-import com.ahnis.journalai.analysis.dto.MoodReportResponse;
+import com.ahnis.journalai.analysis.dto.MoodReportEmailResponse;
 import com.ahnis.journalai.analysis.exception.ReportNotFoundException;
 import com.ahnis.journalai.analysis.mapper.ReportMapper;
 import com.ahnis.journalai.analysis.repository.ReportRepository;
 import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ public class ReportService {
     }
 
     @Async
-    public void sendReport(User user, MoodReportResponse report) {
+    public void sendReport(User user, MoodReportEmailResponse report) {
         log.info("Sending report to user: {}", user.getUsername());
         notificationService.sendEmailReport(user.getEmail(), report);
     }
@@ -42,7 +43,7 @@ public class ReportService {
     public void generateReport(User user, Instant startDate, Instant endDate) {
         try {
             // Analyze journals between startDate and endDate
-            MoodReportResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId(), user.getUsername(), user.getPreferences(), startDate, endDate).join();
+            MoodReportEmailResponse moodReport = journalAnalysisService.analyzeUserMood(user.getId(), user.getUsername(), user.getPreferences(), startDate, endDate).join();
 
             // Save the report
             var reportEntity = reportMapper.toMoodReportEntity(user, moodReport);
@@ -61,7 +62,7 @@ public class ReportService {
     public List<MoodReportApiResponse> getAllReportsByUserId(String userId) {
         return reportRepository.findByUserId(userId).stream()
                 .map(reportMapper::toApiResponse)
-                .toList(); //Immutable list
+                .toList();
     }
 
     public MoodReportApiResponse getReportById(String userId, String reportId) {

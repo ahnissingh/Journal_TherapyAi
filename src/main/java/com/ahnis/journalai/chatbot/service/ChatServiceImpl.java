@@ -66,7 +66,6 @@ public class ChatServiceImpl implements ChatService {
 
         this.chatClient = chatClient.defaultAdvisors(List.of(
                 new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(3).build()),
-//                VectorStoreChatMemoryAdvisor.builder(vectorStore).build(),
                 new MessageChatMemoryAdvisor(chatMemory)
         )).build();
     }
