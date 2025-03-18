@@ -17,7 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,6 @@ public class ChatServiceImpl implements ChatService {
      *
      * @param user        The {@link User} initiating the chat.
      * @param chatRequest The {@link ChatRequest} containing the user's message and conversation ID.
-     * @param userId      The unique ID of the user.
      * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
      * @throws SecurityException If the conversation ID is invalid for the given user.
      */
@@ -103,7 +101,6 @@ public class ChatServiceImpl implements ChatService {
      * @param chatRequest The {@link ChatStreamRequest} containing the user's message and chat ID.
      * @param chatId      The unique ID of the chat session.
      * @param user        The {@link User} initiating the chat.
-     * @param userId      The unique ID of the user.
      * @return A {@link Flux} of strings representing the chatbot's streaming response.
      * @throws SecurityException If the chat ID is invalid for the given user.
      */
@@ -137,9 +134,9 @@ public class ChatServiceImpl implements ChatService {
      * conversation memory for context-aware interactions.
      * </p>
      *
-     * @param userId          The unique ID of the user, used to filter journals by the user's ID.
-     * @param message         The user's message, used as the query for semantic search in the {@link QuestionAnswerAdvisor}.
-     * @param conversationId  The unique ID of the conversation, used to manage short-term memory in the {@link MessageChatMemoryAdvisor}.
+     * @param userId         The unique ID of the user, used to filter journals by the user's ID.
+     * @param message        The user's message, used as the query for semantic search in the {@link QuestionAnswerAdvisor}.
+     * @param conversationId The unique ID of the conversation, used to manage short-term memory in the {@link MessageChatMemoryAdvisor}.
      * @return A {@link Consumer} that configures the {@link ChatClient.AdvisorSpec} with the necessary advisors and parameters.
      */
     private Consumer<ChatClient.AdvisorSpec> advisorSpecification(String userId, String message, String conversationId) {
