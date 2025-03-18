@@ -20,7 +20,6 @@ public class JournalEmbeddingService {
     private final VectorStore vectorStore;
 
     @Async
-    @Transactional
     public void saveJournalEmbeddings(Journal journal) {
 
         try {
@@ -48,7 +47,6 @@ public class JournalEmbeddingService {
     }
 
     @Async
-    @Transactional
     public void updateJournalEmbeddings(Journal journal) {
         try {
             deleteJournalEmbeddings(journal.getId());
@@ -60,7 +58,6 @@ public class JournalEmbeddingService {
     }
 
     @Async
-    @Transactional
     public void deleteJournalEmbeddings(String journalId) {
         try {
             // Delete embeddings by userId and journalId
