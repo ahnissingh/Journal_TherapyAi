@@ -6,6 +6,8 @@ import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.user.entity.User;
 import reactor.core.publisher.Flux;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * The service interface for handling chat interactions with the chatbot.
  * <p>

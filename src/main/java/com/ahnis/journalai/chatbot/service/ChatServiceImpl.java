@@ -6,9 +6,7 @@ import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.tools.ChatbotTools;
 import com.ahnis.journalai.user.entity.User;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.client.advisor.VectorStoreChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.*;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -24,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * The primary implementation of the {@link ChatService} interface.
@@ -34,7 +33,6 @@ import java.util.UUID;
  * <ul>
  *   <li>{@link QuestionAnswerAdvisor}: Provides responses based on the user's journal entries and preferences.</li>
  *   <li>{@link MessageChatMemoryAdvisor}: Manages short-term conversation memory for context-aware interactions.</li>
- *   <li>{@link VectorStoreChatMemoryAdvisor}: Utilizes long-term conversation memory stored in a vector store for accurate and personalized responses.</li>
  * </ul>
  * </p>
  * <p>
@@ -49,6 +47,7 @@ import java.util.UUID;
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
+    private final VectorStore vectorStore;
 
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
@@ -65,11 +64,11 @@ public class ChatServiceImpl implements ChatService {
 
     public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore, ChatbotTools chatbotTools) {
         this.chatClient = chatClient.defaultAdvisors(List.of(
-                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().topK(3).build()),
                         new MessageChatMemoryAdvisor(chatMemory)
                 ))
                 .defaultTools(chatbotTools)
                 .build();
+        this.vectorStore = vectorStore;
     }
 
     /**
@@ -88,21 +87,12 @@ public class ChatServiceImpl implements ChatService {
 
         Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
-        final var conversationFinalId = conversationId;
         var response = chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
-                .advisors(a -> a
-                                .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
-                                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-                                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
-//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
-//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4)
-
-                )
+                .advisors(advisorSpecification(userId, chatRequest.message(),conversationId))
                 .call()
                 .content();
-
         return new ChatResponse(conversationId, response);
     }
 
@@ -122,19 +112,25 @@ public class ChatServiceImpl implements ChatService {
 
         Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
-        final var conversationFinalId = chatId;
         return chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
-                .advisors(a -> a
-                        .param(QuestionAnswerAdvisor.FILTER_EXPRESSION, "userId == '" + userId + "'")
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationFinalId)
-//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
-//                        .param(VectorStoreChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4)
-                        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .advisors(advisorSpecification(userId, chatRequest.message(), chatId))
                 .stream()
                 .content()
                 .onBackpressureBuffer();
+    }
+
+    private Consumer<ChatClient.AdvisorSpec> advisorSpecification(String userId, String message, String conversationId) {
+        return advisorSpec -> advisorSpec
+                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder()
+                        .filterExpression("userId == '" + userId + "'")
+                        .topK(3)
+                        .query(message)
+                        .build()))
+                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
+                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10);
+
     }
 
     /**
@@ -155,11 +151,6 @@ public class ChatServiceImpl implements ChatService {
         userPreferencesMap.put("userAge", userPreferences.getAge());
         userPreferencesMap.put("userGender", userPreferences.getGender());
         userPreferencesMap.put("timeZone", user.getTimezone());
-        userPreferencesMap.put("currentStreak", user.getCurrentStreak());
-        userPreferencesMap.put("longestStreak", user.getLongestStreak());
-        userPreferencesMap.put("lastJournalEntryDate", user.getLastJournalEntryDate() != null ? user.getLastJournalEntryDate().atZone(ZoneId.of(user.getTimezone())).toString() : "null");
-        userPreferencesMap.put("lastReportAt", user.getLastReportAt() != null ? user.getLastReportAt() : "null");
-        userPreferencesMap.put("nextReportOn", user.getNextReportOn().atZone(ZoneId.of(user.getTimezone())).toString());
         userPreferencesMap.put("userMessage", chatRequestMessage);
         return userChatbotPromptTemplate.create(userPreferencesMap);
     }
