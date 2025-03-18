@@ -80,7 +80,8 @@ public class ChatServiceImpl implements ChatService {
      * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
      * @throws SecurityException If the conversation ID is invalid for the given user.
      */
-    public ChatResponse chatSync(User user, ChatRequest chatRequest, String userId) {
+    public ChatResponse chatSync(User user, ChatRequest chatRequest) {
+        var userId = user.getId();
         var conversationId = chatRequest.conversationId();
         if (conversationId == null || conversationId.isEmpty()) conversationId = createConversation(userId);
         else if (!isValidConversation(userId, conversationId)) throw new SecurityException("Invalid user id");
@@ -90,7 +91,7 @@ public class ChatServiceImpl implements ChatService {
         var response = chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
-                .advisors(advisorSpecification(userId, chatRequest.message(),conversationId))
+                .advisors(advisorSpecification(userId, chatRequest.message(), conversationId))
                 .call()
                 .content();
         return new ChatResponse(conversationId, response);
@@ -106,7 +107,8 @@ public class ChatServiceImpl implements ChatService {
      * @return A {@link Flux} of strings representing the chatbot's streaming response.
      * @throws SecurityException If the chat ID is invalid for the given user.
      */
-    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user, String userId) {
+    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user) {
+        var userId = user.getId();
         if (chatId == null) chatId = createConversation(userId);
         else if (!isValidConversation(userId, chatId)) throw new SecurityException("Invalid chat id for user ");
 

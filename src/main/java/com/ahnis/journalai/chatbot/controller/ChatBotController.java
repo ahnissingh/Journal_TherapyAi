@@ -49,7 +49,7 @@ public class ChatBotController {
             @RequestBody ChatRequest chatRequest,
             @AuthenticationPrincipal User user
     ) {
-        return chatService.chatSync(user, chatRequest, user.getId());
+        return chatService.chatSync(user, chatRequest);
     }
 
     /**
@@ -65,7 +65,9 @@ public class ChatBotController {
      * @return A {@link Flux} of strings representing the chatbot's streaming response.
      */
     @PostMapping(value = "/c/{chatId}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public Flux<String> chatStream(@PathVariable(required = false) String chatId, @RequestBody ChatStreamRequest chatRequest, @AuthenticationPrincipal User user) {
-        return chatService.chatFlux(chatRequest, chatId, user, user.getId());
+    public Flux<String> chatStream(@PathVariable(required = false) String chatId,
+                                   @RequestBody ChatStreamRequest chatRequest,
+                                   @AuthenticationPrincipal User user) {
+        return chatService.chatFlux(chatRequest, chatId, user);
     }
 }

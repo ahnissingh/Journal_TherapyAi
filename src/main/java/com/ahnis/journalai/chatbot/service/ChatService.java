@@ -18,8 +18,8 @@ import java.util.concurrent.CompletableFuture;
  * <p>
  * The interface provides two main methods:
  * <ul>
- *   <li>{@link #chatSync(User, ChatRequest, String)}: For synchronous chat interactions.</li>
- *   <li>{@link #chatFlux(ChatStreamRequest, String, User, String)}: For asynchronous (streaming) chat interactions.</li>
+ *   <li>{@link #chatSync(User, ChatRequest)}: For synchronous chat interactions.</li>
+ *   <li>{@link #chatFlux(ChatStreamRequest, String chatId , User user)}: For asynchronous (streaming) chat interactions.</li>
  * </ul>
  * </p>
  *
@@ -36,10 +36,9 @@ public interface ChatService {
      *
      * @param user    The {@link User} initiating the chat. Contains user-specific preferences and metadata.
      * @param request The {@link ChatRequest} containing the user's message and optional conversation ID.
-     * @param userId  The unique ID of the user. Used for authentication and conversation management.
      * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
      */
-    ChatResponse chatSync(User user, ChatRequest request, String userId);
+    ChatResponse chatSync(User user, ChatRequest request);
 
     /**
      * Handles asynchronous (streaming) chat interactions with the user.
@@ -51,8 +50,7 @@ public interface ChatService {
      * @param chatRequest The {@link ChatStreamRequest} containing the user's message.
      * @param chatId      The unique ID of the chat session. If not provided, a new conversation is created.
      * @param user        The {@link User} initiating the chat. Contains user-specific preferences and metadata.
-     * @param userId      The unique ID of the user. Used for authentication and conversation management.
      * @return A {@link Flux} of strings representing the chatbot's streaming response.
      */
-    Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user, String userId);
+    Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user);
 }
