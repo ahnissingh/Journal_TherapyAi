@@ -49,7 +49,6 @@ import java.util.UUID;
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
-    private final ChatbotTools chatbotTools;
 
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
@@ -71,7 +70,6 @@ public class ChatServiceImpl implements ChatService {
                 ))
                 .defaultTools(chatbotTools)
                 .build();
-        this.chatbotTools = chatbotTools;
     }
 
     /**

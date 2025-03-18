@@ -20,6 +20,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,16 +34,40 @@ public class JournalServiceImpl implements JournalService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
+    //    @Override
+//    @Async
+//    public void createJournal(JournalRequest dto, String userId) {
+////        Map dto to entity and get reference
+//        Journal journal = journalMapper.toEntity(dto, userId);
+//        //Save the journal and pass it for embedding
+//        Journal savedJournal = journalRepository.save(journal);
+//        journalEmbeddingService.saveJournalEmbeddings(savedJournal);
+//        updateUsersStreak(userId);
+//
+//    }
     @Override
     @Async
-    public void createJournal(JournalRequest dto, String userId) {
-//        Map dto to entity and get reference
+    public void createJournal(JournalRequest dto, String userId) { //v2
+        // Map DTO to entity
         Journal journal = journalMapper.toEntity(dto, userId);
-        //Save the journal and pass it for embedding
-        Journal savedJournal = journalRepository.save(journal);
-        journalEmbeddingService.saveJournalEmbeddings(savedJournal);
-        updateUsersStreak(userId);
 
+        // Save the journal and generate embeddings concurrently
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            // Submit tasks for concurrent execution
+            CompletableFuture<Journal> saveJournalFuture = CompletableFuture.supplyAsync(
+                    () -> journalRepository.save(journal), executor);
+
+            CompletableFuture<Void> saveEmbeddingsFuture = saveJournalFuture.thenAcceptAsync(
+                    savedJournal -> {
+                        journalEmbeddingService.saveJournalEmbeddings(savedJournal);
+                        updateUsersStreak(userId);
+                    }, executor);
+
+            // Wait for both tasks to complete
+            CompletableFuture.allOf(saveJournalFuture, saveEmbeddingsFuture).join();
+        } catch (Exception e) {
+            log.error("Failed to create journal: {}", e.getMessage());
+        }
     }
 
     @Override
