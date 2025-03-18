@@ -14,11 +14,12 @@ import java.time.temporal.ChronoUnit;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+//tested working properly
 public class JournalingReminderScheduler {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
-    @Scheduled(cron = "0 27 23 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 52 19 * * ?", zone = "Asia/Kolkata")
     public void remindUsersToJournal() {
         log.info("Running journaling reminder scheduler...");
         userRepository.findByRemindersEnabled(true)
