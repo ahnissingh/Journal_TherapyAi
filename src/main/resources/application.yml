@@ -77,14 +77,20 @@ management:
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
 
 logging:
-  level:
-    com.sendgrid.*: debug
-    org.springframework.scheduling.annotation: DEBUG
-    org.springframework.*: debug
-    com.datastax.oss: debug
-    org.bson.*: debug
-    org.springframework.data: debug
-
+#  level:
+#    com.sendgrid.*: debug
+#    org.springframework.scheduling.annotation: DEBUG
+#    org.springframework.*: debug
+#    com.datastax.oss: debug
+#    org.bson.*: debug
+#    org.springframework.data: debug
+scheduler:
+  remind-users:
+    cron: "0 56 19 * * ?"   # 7:52 PM IST
+    zone: "Asia/Kolkata"
+  check-reports:
+    cron: "0 56 19 * * ?"   # 7:20 PM IST
+    zone: "Asia/Kolkata"
 
 milvus:
   cloud:

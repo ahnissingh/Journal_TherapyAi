@@ -25,11 +25,10 @@ public class ReportScheduler {
 
     //todo next asap PROFILING dev and prod
     //todo in prod and dev have cron expression in yaml
-    //todo in prod have 12 am utc and in dev as required for testing set accordingly :)
 
-
-    @Scheduled(cron = "0 20 16 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "${scheduler.check-reports.cron}", zone = "${scheduler.check-reports.zone}")
     public void checkForReports() {
+        log.info("Scheduler running {} and is virtual : {} ", Thread.currentThread().getName(), Thread.currentThread().isVirtual());
         // Get the current date in UTC
         ZonedDateTime nowInUTC = ZonedDateTime.now(ZoneOffset.UTC);
         LocalDate todayInUTC = nowInUTC.toLocalDate();
@@ -49,7 +48,7 @@ public class ReportScheduler {
             return;
         }
 
-        for (User user : usersDueToday) {
+        usersDueToday.forEach(user -> {
             try {
                 Instant lastReportAt = user.getLastReportAt();
                 Instant nextReportOn = user.getNextReportOn();
@@ -57,19 +56,21 @@ public class ReportScheduler {
                 Instant newNextReportOn = calculateNextReportOn(nextReportOn, user.getPreferences().getReportFrequency());
                 //EDGE CASES
                 //Existing user with last report generated
-                if (lastReportAt != null) {
-                    // For subsequent reports, using lastReportAt as the start date
-                    //user reg on 23 feb  and first report on 2nd march                  (28 days in feb)
-                    //eg last report was on 2nd march and today is 9th
-                    //so generate report from 2nd till 9th
-                    reportService.generateReport(user, lastReportAt, nextReportOn);
-                } else {
-                    //EDGE CASE New user using registration date as start date
-                    //last report is null so user2 registers at  say 2march
-                    //today is 9th march then first report so send report from 2nd till 9th
-                    Instant registrationDate = user.getCreatedAt();
-                    reportService.generateReport(user, registrationDate, nextReportOn);
-                }
+                var startDate = (lastReportAt != null) ? lastReportAt : user.getCreatedAt();
+                reportService.generateReport(user, startDate, nextReportOn);
+//                if (lastReportAt != null) {
+//                    // For subsequent reports, using lastReportAt as the start date
+//                    //user reg on 23 feb  and first report on 2nd march                  (28 days in feb)
+//                    //eg last report was on 2nd march and today is 9th
+//                    //so generate report from 2nd till 9th
+//                    reportService.generateReport(user, lastReportAt, nextReportOn);
+//                } else {
+//                    //EDGE CASE New user using registration date as start date
+//                    //last report is null so user2 registers at  say 2march
+//                    //today is 9th march then first report so send report from 2nd till 9th
+//                    Instant registrationDate = user.getCreatedAt();
+//                    reportService.generateReport(user, registrationDate, nextReportOn);
+//                }
                 log.info("Report generated and dates updated for user: {}", user.getUsername());
                 //update last reportAt to today(nextReportOn)
                 userRepository.updateLastReportAtById(user.getId(), nextReportOn);
@@ -79,6 +80,6 @@ public class ReportScheduler {
             } catch (Exception e) {
                 log.error("Failed to generate report for user: {}", user.getUsername(), e);
             }
-        }
+        });
     }
 }

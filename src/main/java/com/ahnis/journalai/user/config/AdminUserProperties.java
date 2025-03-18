@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties(prefix = "admin.user")
-
 @Validated
 public record AdminUserProperties(
         @NotNull(message = "Admin enabled flag must be specified")

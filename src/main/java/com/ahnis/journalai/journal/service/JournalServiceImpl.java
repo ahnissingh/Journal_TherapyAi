@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,12 +33,13 @@ public class JournalServiceImpl implements JournalService {
     @Override
     @Async
     public void createJournal(JournalRequest dto, String userId) {
-        //Map dto to entity and get reference
+//        Map dto to entity and get reference
         Journal journal = journalMapper.toEntity(dto, userId);
         //Save the journal and pass it for embedding
         Journal savedJournal = journalRepository.save(journal);
         journalEmbeddingService.saveJournalEmbeddings(savedJournal);
         updateUsersStreak(userId);
+
     }
 
     @Override

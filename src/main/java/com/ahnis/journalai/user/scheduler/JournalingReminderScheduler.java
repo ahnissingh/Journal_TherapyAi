@@ -14,12 +14,11 @@ import java.time.temporal.ChronoUnit;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-//tested working properly
 public class JournalingReminderScheduler {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
-    @Scheduled(cron = "0 52 19 * * ?", zone = "Asia/Kolkata")
+    @Scheduled(cron = "${scheduler.remind-users.cron}", zone = "${scheduler.remind-users.zone}")
     public void remindUsersToJournal() {
         log.info("Running journaling reminder scheduler...");
         userRepository.findByRemindersEnabled(true)
@@ -47,7 +46,8 @@ public class JournalingReminderScheduler {
         }
 
         // Last journal ka date user ke local timezone mein convert karo
-        LocalDate lastJournalDateUserLocal = user.getLastJournalEntryDate()
+        LocalDate lastJournalDateUserLocal = user
+                .getLastJournalEntryDate()
                 .atZone(userTimeZone)
                 .toLocalDate();
 
