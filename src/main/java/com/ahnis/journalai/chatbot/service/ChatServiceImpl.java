@@ -123,6 +123,25 @@ public class ChatServiceImpl implements ChatService {
                 .onBackpressureBuffer();
     }
 
+    /**
+     * Configures the advisors for the chat client, including the {@link QuestionAnswerAdvisor} and {@link MessageChatMemoryAdvisor}.
+     * This method sets up the necessary parameters for the advisors to provide personalized and context-aware responses.
+     *
+     * <p>
+     * The {@link QuestionAnswerAdvisor} is configured with a {@link SearchRequest} that filters journals by the user's ID,
+     * limits the results to the top K relevant journals, and uses the user's message as the query for semantic search.
+     * </p>
+     *
+     * <p>
+     * The {@link MessageChatMemoryAdvisor} is configured with the conversation ID and retrieve size to manage short-term
+     * conversation memory for context-aware interactions.
+     * </p>
+     *
+     * @param userId          The unique ID of the user, used to filter journals by the user's ID.
+     * @param message         The user's message, used as the query for semantic search in the {@link QuestionAnswerAdvisor}.
+     * @param conversationId  The unique ID of the conversation, used to manage short-term memory in the {@link MessageChatMemoryAdvisor}.
+     * @return A {@link Consumer} that configures the {@link ChatClient.AdvisorSpec} with the necessary advisors and parameters.
+     */
     private Consumer<ChatClient.AdvisorSpec> advisorSpecification(String userId, String message, String conversationId) {
         return advisorSpec -> advisorSpec
                 .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder()
