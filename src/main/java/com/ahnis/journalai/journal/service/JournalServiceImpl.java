@@ -36,17 +36,7 @@ public class JournalServiceImpl implements JournalService {
     private final NotificationService notificationService;
     private final JournalReactiveRepository journalReactiveRepository;
 
-    //    @Override
-//    @Async
-//    public void createJournal(JournalRequest dto, String userId) {
-////        Map dto to entity and get reference
-//        Journal journal = journalMapper.toEntity(dto, userId);
-//        //Save the journal and pass it for embedding
-//        Journal savedJournal = journalRepository.save(journal);
-//        journalEmbeddingService.saveJournalEmbeddings(savedJournal);
-//        updateUsersStreak(userId);
-//
-//    }
+
     @Override
     @Async
     public void createJournal(JournalRequest dto, String userId) { //v2

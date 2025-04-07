@@ -1,10 +1,8 @@
 package com.ahnis.journalai.user.entity;
 
 import com.ahnis.journalai.user.enums.Role;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,8 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +25,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Document(collection = "users")
 public class User implements UserDetails {
-
+    //generic fields
     @Id
     private String id; //Automatically to object id
     @Indexed(unique = true)
@@ -40,19 +36,11 @@ public class User implements UserDetails {
     @ToString.Exclude
     private String password;
 
-    private Preferences preferences;
-
-    @Indexed
-    private Instant nextReportOn;
-
-    @Indexed
-    private Instant lastReportAt;
-
-    private String timezone; // New field
+    private String timezone;
 
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
-    //new fields added
+
     @Builder.Default
     private boolean enabled = true; // Default to true
 
@@ -66,18 +54,23 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired = true; // Default to true
 
     @CreatedDate
-
     private Instant createdAt;
 
     @LastModifiedDate
-
     private Instant updatedAt;
-
+    //user specific
+    private Preferences preferences;
+    @Indexed
+    private Instant nextReportOn;
+    @Indexed
+    private Instant lastReportAt;
 
     private int currentStreak; // Current consecutive days of journal writing
     private int longestStreak; // Longest streak achieved
     private Instant lastJournalEntryDate; // Date of the last journal entry
 
+
+    //for spring security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
