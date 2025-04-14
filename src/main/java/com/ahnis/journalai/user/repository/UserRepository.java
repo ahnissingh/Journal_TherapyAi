@@ -3,19 +3,19 @@ package com.ahnis.journalai.user.repository;
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
 import org.springframework.data.mongodb.repository.*;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ '$or' : [ { 'username' : ?0 }, { 'email' : ?0 } ] }")
     Optional<User> findByUsernameOrEmail(String identifier);
 
     boolean existsByUsernameOrEmail(String username, String email);
-
-    boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
@@ -84,6 +84,7 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{ 'preferences.remindersEnabled': ?0 }")
     List<User> findByRemindersEnabled(boolean remindersEnabled);
+
     @Aggregation(pipeline = {
             "{ $match: { nextReportOn: { $gte: ?0, $lt: ?1 } } }", // Filter users with nextReportOn within the current day
             "{ $lookup: { from: 'journals', localField: 'id', foreignField: 'userId', as: 'journals' } }", // Join with journals collection

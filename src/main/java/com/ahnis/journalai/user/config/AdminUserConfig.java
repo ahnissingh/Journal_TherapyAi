@@ -24,7 +24,7 @@ public class AdminUserConfig {
     @Bean
     @ConditionalOnProperty(name = "admin.user.enabled", havingValue = "true")
     CommandLineRunner initAdminUser(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        return args -> userRepository.findByUsername(adminUserProperties.username())
+        return _ -> userRepository.findByUsername(adminUserProperties.username())
                 .ifPresentOrElse(
                         this::logUserAlreadyExists,
                         () -> buildAndSaveUser(userRepository, passwordEncoder)
@@ -42,6 +42,9 @@ public class AdminUserConfig {
                 .password(passwordEncoder.encode(adminUserProperties.password()))
                 .roles(Set.of(Role.ADMIN))
                 .preferences(adminUserProperties.preferences())
+                .firstName("admin")
+                .lastName("admin")
+                .timezone("Asia/Kolkata")
                 .build();
         userRepository.save(adminUser);
         log.info("Admin user created with username: {} and email: {}", adminUser.getUsername(), adminUser.getEmail());

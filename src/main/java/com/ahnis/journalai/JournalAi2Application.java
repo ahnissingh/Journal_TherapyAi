@@ -1,15 +1,15 @@
 package com.ahnis.journalai;
 
-import com.ahnis.journalai.analysis.scheduler.ReportScheduler;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import com.ahnis.journalai.user.repository.PasswordResetTokenRepository;
+import com.ahnis.journalai.user.repository.TherapistRepository;
+import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
+import org.springframework.ai.vectorstore.milvus.autoconfigure.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +27,7 @@ import java.util.TimeZone;
 @Slf4j
 @SpringBootApplication(exclude = MilvusVectorStoreAutoConfiguration.class)
 @EnableMongoAuditing
+@EnableMongoRepositories
 @ConfigurationPropertiesScan
 @EnableScheduling
 @EnableAsync
@@ -39,7 +40,6 @@ public class JournalAi2Application {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
         SpringApplication.run(JournalAi2Application.class, args);
     }
-
 
 
 }

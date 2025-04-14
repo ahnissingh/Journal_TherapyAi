@@ -2,13 +2,16 @@ package com.ahnis.journalai.user.service.impl;
 
 import com.ahnis.journalai.common.security.JwtUtil;
 import com.ahnis.journalai.user.dto.request.AuthRequest;
+import com.ahnis.journalai.user.dto.request.TherapistRegistrationRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.AuthResponse;
+import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.ReportFrequency;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.UsernameOrEmailAlreadyExistsException;
 import com.ahnis.journalai.user.mapper.UserMapper;
+import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.service.AuthService;
 import com.ahnis.journalai.user.util.UserUtils;
@@ -16,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final TherapistRepository therapistRepository;
 
 
     @Override
@@ -61,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
                 registrationDTO.username(), registrationDTO.email(), registrationDTO.preferences(), newUser.getNextReportOn());
         return buildAuthResponse(savedUser);
     }
-
+//Single login method
 
     @Override
     public AuthResponse loginUser(AuthRequest authRequest) {
@@ -69,12 +75,37 @@ public class AuthServiceImpl implements AuthService {
                 new UsernamePasswordAuthenticationToken(
                         authRequest.usernameOrEmail(),
                         authRequest.password()));
-        var user = (User) authentication.getPrincipal();
+        var user =  (UserDetails) authentication.getPrincipal();
         log.info("User logged in {}", authRequest.usernameOrEmail());
         return buildAuthResponse(user);
     }
 
-    private AuthResponse buildAuthResponse(User user) {
+    @Override
+    @Transactional
+    public AuthResponse registerTherapist(TherapistRegistrationRequest request) {
+        if (therapistRepository.existsByUsernameOrEmail(request.username(), request.email()) ||
+                userRepository.existsByUsernameOrEmail(request.username(), request.email())
+        ) throw new UsernameOrEmailAlreadyExistsException(request.email());
+
+        var therapist = Therapist.builder()
+                .username(request.username())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .licenseNumber(request.licenseNumber())
+                .specialties(request.specialties())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .yearsOfExperience(request.yearsOfExperience())
+                .bio(request.bio())
+                .languages(request.spokenLanguages())
+                .profilePictureUrl(request.profilePictureUrl())
+                .build();
+        therapistRepository.save(therapist);
+        return buildAuthResponse(therapist);
+    }
+    //Refactored to use UserDetails so can incorporate Therapists and Users both
+
+    private AuthResponse buildAuthResponse(UserDetails user) {
         return new AuthResponse(jwtUtil.generateToken(user));
     }
 

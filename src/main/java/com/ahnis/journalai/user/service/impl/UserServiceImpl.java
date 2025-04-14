@@ -1,11 +1,15 @@
 package com.ahnis.journalai.user.service.impl;
 
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
+import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
+import com.ahnis.journalai.user.exception.UserNotFoundException;
+import com.ahnis.journalai.user.exception.UserNotSubscribedException;
 import com.ahnis.journalai.user.mapper.UserMapper;
+import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.service.UserService;
@@ -30,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final TherapistRepository therapistRepository;
 
     @Transactional
     public void updateUserReportDates(User user, Instant nextReportOn, Instant newNextReportOn) {
@@ -43,6 +48,35 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username)
                 .map(User::getPreferences)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found " + username));
+    }
+
+    @Override
+    public TherapistResponse getSubscribedTherapist(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found", username));
+
+        if (user.getTherapistId() == null) {
+            throw new UserNotSubscribedException("No subscribed therapist");
+        }
+
+        return therapistRepository.findById(user.getTherapistId())
+                .map(therapist -> new TherapistResponse(
+                        therapist.getId(),
+                        therapist.getUsername(),//todo remove dont send to client
+                        therapist.getFirstName(),
+                        therapist.getLastName(),
+                        therapist.getSpecialties(),
+                        therapist.getLanguages(),
+                        therapist.getYearsOfExperience(),
+                        therapist.getBio().length() > 100
+                                ? therapist.getBio().substring(0, 100) + "..."
+                                : therapist.getBio(),
+                        therapist.getProfilePictureUrl()
+
+
+//                        presenceService.isTherapistOnline(therapist.getId()) // Optional
+                ))
+                .orElseThrow(() -> new UserNotFoundException("Therapist not found", user.getUsername()));
     }
 
     @Transactional(readOnly = true)

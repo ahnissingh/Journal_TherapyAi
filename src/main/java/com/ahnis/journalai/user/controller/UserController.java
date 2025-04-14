@@ -3,6 +3,7 @@ package com.ahnis.journalai.user.controller;
 
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
+import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.service.impl.UserServiceImpl;
@@ -53,4 +54,12 @@ public class UserController {
         userService.deleteUserByUsername(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "User deleted successfully", null));
     }
+
+    @GetMapping("/me/therapist")
+    public ResponseEntity<ApiResponse<TherapistResponse>> getMyTherapist(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var therapist = userService.getSubscribedTherapist(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success(therapist));
+    }
+
 }

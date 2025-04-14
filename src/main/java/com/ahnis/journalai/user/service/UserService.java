@@ -2,6 +2,7 @@ package com.ahnis.journalai.user.service;
 
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
+import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
@@ -20,4 +21,6 @@ public interface UserService {
     void updateUserReportDates(User user, Instant nextReportOn, Instant newNextReportOn);
 
     Preferences getUserPreferencesByUsername(String username);
+
+    TherapistResponse getSubscribedTherapist(String username);
 }

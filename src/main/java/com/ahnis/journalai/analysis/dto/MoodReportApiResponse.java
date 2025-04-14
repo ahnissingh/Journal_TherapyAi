@@ -1,7 +1,5 @@
 package com.ahnis.journalai.analysis.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.Instant;
 import java.util.Map;
 import java.util.List;

@@ -1,6 +1,7 @@
 package com.ahnis.journalai.user.controller;
 
 import com.ahnis.journalai.user.dto.request.AuthRequest;
+import com.ahnis.journalai.user.dto.request.TherapistRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.AuthResponse;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.service.AuthService;
@@ -21,20 +22,27 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
 
+    /// Handles both users and therapists
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         AuthResponse authResponse = authService.loginUser(authRequest);
         return ResponseEntity.ok(authResponse);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationRequest dto) {
-        var registeredUserAuthResponse = authService.registerUser(dto);
+    /// Refactored for users
+    @PostMapping("/register/user")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationRequest request) {
+        var registeredUserAuthResponse = authService.registerUser(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(registeredUserAuthResponse);
     }
 
+    /// Endpoint  for therapists
+    @PostMapping("/register/therapist")
+    public AuthResponse registerTherapist(@Valid @RequestBody TherapistRegistrationRequest request) {
+        return authService.registerTherapist(request);
+    }
 
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestParam String email) {

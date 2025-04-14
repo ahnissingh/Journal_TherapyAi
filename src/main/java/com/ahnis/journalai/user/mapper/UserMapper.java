@@ -21,7 +21,8 @@ public interface UserMapper {
     @Mapping(target = "currentStreak", ignore = true) // Ignored during registration
     @Mapping(target = "longestStreak", ignore = true) // Ignored during registration
     @Mapping(target = "lastJournalEntryDate", ignore = true)
-
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
         // Ignored during registration
         //nextReportOn is calculated in service
     User toEntity(UserRegistrationRequest dto);
@@ -43,6 +44,9 @@ public interface UserMapper {
     @Mapping(target = "currentStreak", source = "currentStreak")
     @Mapping(target = "longestStreak", source = "longestStreak")
     @Mapping(target = "lastJournalEntryDate", source = "lastJournalEntryDate")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "subscribedAt", source = "subscribedAt")//therapist subscribed at
     UserResponse toResponseDto(User user);
 
 

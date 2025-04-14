@@ -70,4 +70,7 @@ public class ChatBotController {
                                    @AuthenticationPrincipal User user) {
         return chatService.chatFlux(chatRequest, chatId, user);
     }
+
+
+
 }

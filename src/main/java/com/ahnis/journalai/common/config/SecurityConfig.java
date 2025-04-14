@@ -32,6 +32,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
@@ -50,7 +51,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() //Only public endpoint
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/register/**").permitAll()
                         .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
                         .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
                         .anyRequest().authenticated()
@@ -80,6 +82,7 @@ public class SecurityConfig {
     @Bean
     public RequestMatcher publicEndpointsRequestMatcher() {
         return new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/v1/auth/register/**"),
                 new AntPathRequestMatcher("/api/v1/auth/**"),
                 new AntPathRequestMatcher("/swagger-ui/**"),
                 new AntPathRequestMatcher("/v3/api-docs/**")

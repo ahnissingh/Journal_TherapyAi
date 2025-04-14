@@ -9,7 +9,6 @@ spring:
       uri: ${MONGO_ATLAS_URL}
       auto-index-creation: true
       database: journal_ai
-
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -25,7 +24,7 @@ spring:
     virtual:
       enabled: true
   main:
-    allow-bean-definition-overriding: true
+    allow-bean-definition-overriding: false
 email:
   sendgrid:
     config:

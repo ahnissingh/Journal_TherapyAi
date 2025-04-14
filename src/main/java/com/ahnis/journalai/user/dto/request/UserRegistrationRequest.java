@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Size;
 
 //todo migrate validation properties to config
 public record UserRegistrationRequest(
+        @NotBlank String firstName,
+        @NotBlank String lastName,
         @NotBlank(message = "Username is required")
         @Size(min = 3, max = 20, message = "Username must be 3-20 characters")
         String username,

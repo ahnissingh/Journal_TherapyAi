@@ -5,7 +5,6 @@ import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.journal.entity.Journal;
 import com.ahnis.journalai.journal.exception.JournalNotFoundException;
 import com.ahnis.journalai.journal.mapper.JournalMapper;
-import com.ahnis.journalai.journal.repository.JournalReactiveRepository;
 import com.ahnis.journalai.journal.repository.JournalRepository;
 import com.ahnis.journalai.journal.embedding.JournalEmbeddingService;
 import com.ahnis.journalai.notification.service.NotificationService;
@@ -34,8 +33,6 @@ public class JournalServiceImpl implements JournalService {
     private final JournalMapper journalMapper;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private final JournalReactiveRepository journalReactiveRepository;
-
 
     @Override
     @Async
@@ -54,7 +51,6 @@ public class JournalServiceImpl implements JournalService {
                         journalEmbeddingService.saveJournalEmbeddings(savedJournal);
                         updateUsersStreak(userId);
                     }, executor);
-
             // Wait for both tasks to complete
             CompletableFuture.allOf(saveJournalFuture, saveEmbeddingsFuture).join();
         } catch (Exception e) {

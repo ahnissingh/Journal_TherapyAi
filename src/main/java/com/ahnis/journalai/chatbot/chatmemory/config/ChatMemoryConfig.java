@@ -4,6 +4,7 @@ import com.ahnis.journalai.chatbot.chatmemory.custom.MongoDbChatMemory;
 import com.ahnis.journalai.chatbot.chatmemory.custom.MongoDbChatMemoryConfig;
 import com.mongodb.client.MongoClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,4 +48,6 @@ public class ChatMemoryConfig {
                 .build()
         );
     }
+
+
 }
