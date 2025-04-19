@@ -85,7 +85,7 @@ public class ChatServiceImpl implements ChatService {
         var response = chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
-                .toolContext(createToolContext(userId))
+                .toolContext(createToolContext(userId, user.getUsername()))
                 .advisors(advisorSpecification(userId, chatRequest.message(), conversationId))
                 .call()
                 .content();
@@ -111,7 +111,7 @@ public class ChatServiceImpl implements ChatService {
         return chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
-                .toolContext(createToolContext(userId))
+                .toolContext(createToolContext(userId, user.getUsername()))
                 .advisors(advisorSpecification(userId, chatRequest.message(), chatId))
                 .stream()
                 .content()
@@ -187,7 +187,10 @@ public class ChatServiceImpl implements ChatService {
         return conversationId.startsWith(userId + ":");
     }
 
-    private static Map<String, Object> createToolContext(String userId) {
-        return Map.of("userId", userId);
+    private static Map<String, Object> createToolContext(String userId, String username) {
+        return Map.of(
+                "userId", userId,
+                "username", username
+        );
     }
 }

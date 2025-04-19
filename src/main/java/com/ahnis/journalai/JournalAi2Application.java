@@ -13,14 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.TimeZone;
 
-
-/**
- * todo 1) Pagination and streak based system
- * todo 2 ) When finalised properties files add the packages here for better
- * todo 4 ) Consider defining all exception messages in yaml file for uniformity
- * todo 5) i When finalised project add @ConfigurationPropertiesScan classes or packages
- *        ii Use Mapper Scan for all map struct interfaces
- */
 @Slf4j
 @SpringBootApplication(exclude = MilvusVectorStoreAutoConfiguration.class)
 @EnableMongoAuditing

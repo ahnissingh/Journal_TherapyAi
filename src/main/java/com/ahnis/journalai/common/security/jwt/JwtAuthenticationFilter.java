@@ -94,7 +94,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper.writeValue(response.getWriter(), error);
-            return;
         } catch (JwtException | AuthenticationException ex) {
             var error = new ErrorDetails(
                     LocalDateTime.now(),
@@ -104,7 +103,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper.writeValue(response.getWriter(), error);
-            return;
         }
     }
 }

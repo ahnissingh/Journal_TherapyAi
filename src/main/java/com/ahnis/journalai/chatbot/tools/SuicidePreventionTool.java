@@ -37,6 +37,7 @@ public class SuicidePreventionTool {
 
         var context = toolContext.getContext();
         String userId = (String) context.get("userId");
+        String username = (String) context.get("username");
         if (userId == null) {
             return "I'm here to support you. Would you like to talk more about how you're feeling?";
         }
@@ -49,7 +50,7 @@ public class SuicidePreventionTool {
         }
 
         // Step 2: Notification
-        return notifyTherapistAndRespond(userId);
+        return notifyTherapistAndRespond(userId, username);
     }
 
     private boolean assessSuicideRisk(String message) {
@@ -66,14 +67,14 @@ public class SuicidePreventionTool {
         return Boolean.parseBoolean(response.trim());
     }
 
-    private String notifyTherapistAndRespond(String userId) {
+    private String notifyTherapistAndRespond(String userId, String username) {
         try {
             String therapistId = userRepository.findTherapistIdById(userId)
                     .map(TherapistIdProjection::getTherapistId)
                     .orElseThrow(() -> new IllegalStateException("No therapist assigned"));
 
             notificationService.sendSuicidalAlert(
-                    userId,
+                    username,
                     therapistId,
                     "Urgent: User expressed suicidal thoughts"
             );

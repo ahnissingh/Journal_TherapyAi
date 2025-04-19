@@ -29,7 +29,7 @@ email:
   sendgrid:
     config:
       apiKey: ${SENDGRID_API_KEY}
-      fromEmail: "ahnisaneja@gmail.com"
+      fromEmail: ahnisaneja@gmail.com
 
 
 app:
