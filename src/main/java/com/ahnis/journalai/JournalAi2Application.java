@@ -1,8 +1,5 @@
 package com.ahnis.journalai;
 
-import com.ahnis.journalai.user.repository.PasswordResetTokenRepository;
-import com.ahnis.journalai.user.repository.TherapistRepository;
-import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.vectorstore.milvus.autoconfigure.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
