@@ -3,7 +3,7 @@ package com.ahnis.journalai.chatbot.service;
 import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
-import com.ahnis.journalai.chatbot.tools.ChatbotTools;
+import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.*;
@@ -12,7 +12,6 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ import java.util.function.Consumer;
  * <p>
  * The service uses the following advisors:
  * <ul>
- *   <li>{@link QuestionAnswerAdvisor}: Provides responses based on the user's journal entries and preferences.</li>
  *   <li>{@link MessageChatMemoryAdvisor}: Manages short-term conversation memory for context-aware interactions.</li>
  * </ul>
  * </p>
@@ -47,7 +45,6 @@ import java.util.function.Consumer;
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
-    private final VectorStore vectorStore;
 
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
@@ -57,18 +54,16 @@ public class ChatServiceImpl implements ChatService {
     /**
      * Constructs a new instance of {@link ChatServiceImpl}.
      *
-     * @param chatClient  The {@link ChatClient.Builder} used to build the chat client.
-     * @param chatMemory  The {@link ChatMemory} used for short-term conversation memory.
-     * @param vectorStore The {@link VectorStore} used for long-term conversation memory.
+     * @param chatClient The {@link ChatClient.Builder} used to build the chat client.
+     * @param chatMemory The {@link ChatMemory} used for short-term conversation memory.
      */
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, VectorStore vectorStore, ChatbotTools chatbotTools) {
+    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools) {
         this.chatClient = chatClient.defaultAdvisors(List.of(
                         new MessageChatMemoryAdvisor(chatMemory)
                 ))
                 .defaultTools(chatbotTools)
                 .build();
-        this.vectorStore = vectorStore;
     }
 
     /**
@@ -90,6 +85,7 @@ public class ChatServiceImpl implements ChatService {
         var response = chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
+                .toolContext(createToolContext(userId))
                 .advisors(advisorSpecification(userId, chatRequest.message(), conversationId))
                 .call()
                 .content();
@@ -115,6 +111,7 @@ public class ChatServiceImpl implements ChatService {
         return chatClient
                 .prompt(userChatbotPrompt)
                 .system(systemMessageResource)
+                .toolContext(createToolContext(userId))
                 .advisors(advisorSpecification(userId, chatRequest.message(), chatId))
                 .stream()
                 .content()
@@ -142,13 +139,8 @@ public class ChatServiceImpl implements ChatService {
      */
     private Consumer<ChatClient.AdvisorSpec> advisorSpecification(String userId, String message, String conversationId) {
         return advisorSpec -> advisorSpec
-                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder()
-                        .filterExpression("userId == '" + userId + "'")
-                        .topK(3)
-                        .query(message)
-                        .build()))
                 .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
-                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10);
+                .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5);
 
     }
 
@@ -193,5 +185,9 @@ public class ChatServiceImpl implements ChatService {
      */
     private boolean isValidConversation(String userId, String conversationId) {
         return conversationId.startsWith(userId + ":");
+    }
+
+    private static Map<String, Object> createToolContext(String userId) {
+        return Map.of("userId", userId);
     }
 }

@@ -1,9 +1,9 @@
 spring:
   devtools:
     restart:
-      enabled: false
+      enabled: true
     livereload:
-      enabled: false #Disable in production todo refactor this file into seperate profiles
+      enabled: true #Disable in production todo refactor this file into seperate profiles
   data:
     mongodb:
       uri: ${MONGO_ATLAS_URL}
@@ -75,14 +75,14 @@ management:
         include: "*"
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
 
-logging:
-  level:
-    com.sendgrid.*: debug
-    org.springframework.scheduling.annotation: DEBUG
-    org.springframework.*: debug
-    com.datastax.oss: debug
-    org.bson.*: debug
-    org.springframework.data: debug
+#logging:
+#  level:
+##    com.sendgrid.*: debug
+##    org.springframework.scheduling.annotation: DEBUG
+##    org.springframework.*: debug
+##    com.datastax.oss: debug
+##    org.bson.*: debug
+##    org.springframework.data: debug
 scheduler:
   remind-users:
     cron: "0 56 19 * * ?"   # 7:52 PM IST

@@ -12,6 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
+    @Query(value = "{'_id' : ?0}", fields = "{'therapistId' : 1}")
+    Optional<TherapistIdProjection> findTherapistIdById(String id);
+
     @Query("{ '$or' : [ { 'username' : ?0 }, { 'email' : ?0 } ] }")
     Optional<User> findByUsernameOrEmail(String identifier);
 

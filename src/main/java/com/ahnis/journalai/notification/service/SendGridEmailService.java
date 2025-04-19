@@ -20,6 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SendGridEmailService {
     private final SendGridProperties sendGridProperties;
+    private final SendGrid sendGrid;
 
     @Async
     public void sendEmail(String toEmail, String subject, String content) {
@@ -32,7 +33,6 @@ public class SendGridEmailService {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            var sendGrid = new SendGrid(sendGridProperties.apiKey());
             Response response = sendGrid.api(request);
             log.info("Email sent to {} with status code: {}", toEmail, response.getStatusCode());
         } catch (IOException e) {
