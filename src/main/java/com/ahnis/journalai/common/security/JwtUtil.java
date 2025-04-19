@@ -141,7 +141,7 @@ public class JwtUtil {
      * @param token The JWT to check.
      * @return {@code true} if the JWT is expired, {@code false} otherwise.
      */
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -151,7 +151,7 @@ public class JwtUtil {
      * @param token The JWT from which to extract the expiration date.
      * @return The expiration date as a {@link Date}.
      */
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 }

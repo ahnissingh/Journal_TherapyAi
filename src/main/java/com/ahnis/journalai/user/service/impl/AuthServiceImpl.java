@@ -17,6 +17,9 @@ import com.ahnis.journalai.user.service.AuthService;
 import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final TherapistRepository therapistRepository;
+    private final CaffeineCacheManager cacheManager;
 
 
     @Override
@@ -70,12 +74,17 @@ public class AuthServiceImpl implements AuthService {
 //Single login method
 
     @Override
+    @Cacheable(value = "authResponses", key = "#authRequest.usernameOrEmail()")
     public AuthResponse loginUser(AuthRequest authRequest) {
+        var cache = cacheManager.getCache("authResponses");
+        if (cache != null) {
+            log.info("Cache has been cached for authRequest {}", authRequest.usernameOrEmail());
+        }
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.usernameOrEmail(),
                         authRequest.password()));
-        var user =  (UserDetails) authentication.getPrincipal();
+        var user = (UserDetails) authentication.getPrincipal();
         log.info("User logged in {}", authRequest.usernameOrEmail());
         return buildAuthResponse(user);
     }
@@ -103,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
         therapistRepository.save(therapist);
         return buildAuthResponse(therapist);
     }
-    //Refactored to use UserDetails so can incorporate Therapists and Users both
+
 
     private AuthResponse buildAuthResponse(UserDetails user) {
         return new AuthResponse(jwtUtil.generateToken(user));

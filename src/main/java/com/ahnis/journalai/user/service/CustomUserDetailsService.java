@@ -7,7 +7,10 @@ import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,16 +25,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final TherapistRepository therapistRepository;
+    private final CaffeineCacheManager cacheManager;
 
-//    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        return userRepository.findByUsernameOrEmail(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
-//
-//    }
 
     @Override
+    @Cacheable(value = "userDetails", key = "#identifier")
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        log.debug("Looking up user with identifier '{}'", identifier);
+        Cache cache = cacheManager.getCache("userDetails");
+        if (cache != null && cache.get(identifier) != null) {
+            log.debug("Cache hit for '{}'", identifier);
+        }
         Optional<User> user = userRepository.findByUsernameOrEmail(identifier);
         if (user.isPresent()) {
             return user.get(); // Safe after isPresent() check
@@ -41,6 +45,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             return therapist.get(); // Safe after isPresent() check
         }
         throw new UsernameNotFoundException("Not found: " + identifier);
+    }
+
+    @CacheEvict(value = "userDetails", key = "#identifier")
+    public void evictUserCache(String identifier) {
+        log.info("Evicting cache for user: {}", identifier);
     }
 }
 
