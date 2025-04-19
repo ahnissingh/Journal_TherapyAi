@@ -4,10 +4,12 @@ import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.service.ChatService;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
+import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -45,12 +47,14 @@ public class ChatBotController {
      * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
      */
     @PostMapping()
-    public ChatResponse chat(
+    public ResponseEntity<ApiResponse<ChatResponse>> chat(
             @RequestBody ChatRequest chatRequest,
             @AuthenticationPrincipal User user
     ) {
-        return chatService.chatSync(user, chatRequest);
+        var response = chatService.chatSync(user, chatRequest);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
+
 
     /**
      * Handles asynchronous (streaming) chat interactions with the user.
@@ -70,7 +74,6 @@ public class ChatBotController {
                                    @AuthenticationPrincipal User user) {
         return chatService.chatFlux(chatRequest, chatId, user);
     }
-
 
 
 }

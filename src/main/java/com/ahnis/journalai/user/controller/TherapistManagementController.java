@@ -9,46 +9,44 @@ import com.ahnis.journalai.user.service.TherapistService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/therapists/me")
 @PreAuthorize("hasRole('ROLE_THERAPIST')")
 @RequiredArgsConstructor
-
-//todo add delete api
 public class TherapistManagementController {
     private final TherapistService therapistService;
 
     @GetMapping
-    public ApiResponse<TherapistPersonalResponse> getTherapistProfile(
+    public ResponseEntity<ApiResponse<TherapistPersonalResponse>> getTherapistProfile(
             @AuthenticationPrincipal Therapist therapist
     ) {
-        return ApiResponse.success(
-                therapistService.getProfile(therapist.getId())
-        );
+        var profile = therapistService.getProfile(therapist.getId());
+        return ResponseEntity.ok(ApiResponse.success(profile));
     }
 
     @PatchMapping
-    public ApiResponse<Void> updateProfile(
+    public ResponseEntity<ApiResponse<Void>> updateProfile(
             @Valid @RequestBody TherapistUpdateRequest request,
             @AuthenticationPrincipal Therapist therapist
     ) {
         therapistService.updateProfile(therapist.getId(), request);
-        return ApiResponse.success(HttpStatus.NO_CONTENT, "Profile updated", null);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success(HttpStatus.NO_CONTENT, "Profile updated", null));
     }
 
     @GetMapping("/clients")
-    public ApiResponse<List<TherapistClientResponse>> getMyClients(
+    public ResponseEntity<ApiResponse<List<TherapistClientResponse>>> getMyClients(
             @AuthenticationPrincipal Therapist therapist
     ) {
-        return ApiResponse.success(
-                therapistService.getClients(therapist.getId())
-        );
+        var clients = therapistService.getClients(therapist.getId());
+        return ResponseEntity.ok(ApiResponse.success(clients));
     }
 }

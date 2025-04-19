@@ -1,9 +1,10 @@
 package com.ahnis.journalai.user.controller;
 
+import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.dto.request.AuthRequest;
 import com.ahnis.journalai.user.dto.request.TherapistRegistrationRequest;
-import com.ahnis.journalai.user.dto.response.AuthResponse;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
+import com.ahnis.journalai.user.dto.response.AuthResponse;
 import com.ahnis.journalai.user.service.AuthService;
 import com.ahnis.journalai.user.service.PasswordResetService;
 import jakarta.validation.Valid;
@@ -22,39 +23,39 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
 
-    /// Handles both users and therapists
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
-        AuthResponse authResponse = authService.loginUser(authRequest);
-        return ResponseEntity.ok(authResponse);
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest authRequest) {
+        var authResponse = authService.loginUser(authRequest);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, "Login successful", authResponse));
     }
 
-    /// Refactored for users
     @PostMapping("/register/user")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody UserRegistrationRequest request) {
         var registeredUserAuthResponse = authService.registerUser(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(registeredUserAuthResponse);
+                .body(ApiResponse.success(HttpStatus.CREATED, "User registered successfully", registeredUserAuthResponse));
     }
 
-    /// Endpoint  for therapists
     @PostMapping("/register/therapist")
-    public AuthResponse registerTherapist(@Valid @RequestBody TherapistRegistrationRequest request) {
-        return authService.registerTherapist(request);
+    public ResponseEntity<ApiResponse<AuthResponse>> registerTherapist(@Valid @RequestBody TherapistRegistrationRequest request) {
+        var therapistAuthResponse = authService.registerTherapist(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(HttpStatus.CREATED, "Therapist registered successfully", therapistAuthResponse));
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestParam String email) {
         passwordResetService.sendPasswordResetEmail(email);
-        return "Password reset email sent.";
+        return ResponseEntity.ok(ApiResponse.success("Password reset email sent."));
     }
 
     @PostMapping("/reset-password")
-    public String resetPassword(
+    public ResponseEntity<ApiResponse<String>> resetPassword(
             @RequestParam String token,
             @RequestParam String newPassword) {
         passwordResetService.resetPassword(token, newPassword);
-        return "Password reset successfully.";
+        return ResponseEntity.ok(ApiResponse.success("Password reset successfully."));
     }
 }
