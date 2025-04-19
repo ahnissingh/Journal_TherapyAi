@@ -2,6 +2,8 @@ package com.ahnis.journalai.user.repository;
 
 import com.ahnis.journalai.user.entity.Preferences;
 import com.ahnis.journalai.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
@@ -96,5 +99,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     })
     List<User> findUsersDueForReportWithJournals(Instant startOfDay, Instant endOfDay);
 
+
+    Page<User> findAllByIdIn(Set<String> userIds, Pageable pageable);
 
 }

@@ -7,8 +7,8 @@ import java.time.Instant;
 public record TherapistClientResponse(
         String id,
         String username,
-//        String firstName,
-//        String lastName,
+        String firstName,
+        String lastName,
         String email,
         Instant subscribedAt,
         Instant lastJournalDate,
@@ -18,8 +18,8 @@ public record TherapistClientResponse(
         return new TherapistClientResponse(
                 user.getId(),
                 user.getUsername(),
-//                user.getFirstName(),
-//                user.getLastName(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 user.getSubscribedAt(), // Add this field to User entity
                 user.getLastJournalEntryDate(),

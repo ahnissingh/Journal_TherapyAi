@@ -9,6 +9,7 @@ import com.ahnis.journalai.user.service.AdminService;
 import com.ahnis.journalai.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +27,14 @@ public class AdminController {
 
 
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
-        //directly get from repo no mapping
-        var users = adminService.getAllUsers();
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<UserResponse> users = adminService.getAllUsers(page, size);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
+
 
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<String>> createUsers(@RequestBody List<UserRegistrationRequest> userRegistrationRequests) {

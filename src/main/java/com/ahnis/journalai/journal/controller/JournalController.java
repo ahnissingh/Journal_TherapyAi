@@ -6,6 +6,7 @@ import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.journal.service.JournalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,12 +31,15 @@ public class JournalController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JournalResponse>>> getAllJournals(
-            @AuthenticationPrincipal User user
+    public ResponseEntity<ApiResponse<Page<JournalResponse>>> getAllJournals(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<JournalResponse> journals = journalService.getAllJournals(user.getId());
+        Page<JournalResponse> journals = journalService.getAllJournals(user.getId(), page, size);
         return ResponseEntity.ok(ApiResponse.success(journals));
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JournalResponse>> getJournalById(

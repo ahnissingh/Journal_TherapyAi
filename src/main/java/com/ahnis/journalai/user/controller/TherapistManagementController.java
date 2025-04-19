@@ -8,6 +8,7 @@ import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.service.TherapistService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,10 +44,15 @@ public class TherapistManagementController {
     }
 
     @GetMapping("/clients")
-    public ResponseEntity<ApiResponse<List<TherapistClientResponse>>> getMyClients(
-            @AuthenticationPrincipal Therapist therapist
+    public ResponseEntity<ApiResponse<Page<TherapistClientResponse>>> getMyClients(
+            @AuthenticationPrincipal Therapist therapist,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        var clients = therapistService.getClients(therapist.getId());
+        Page<TherapistClientResponse> clients = therapistService.getClients(therapist.getClientUserId(), page, size);
         return ResponseEntity.ok(ApiResponse.success(clients));
     }
+
+
+
 }

@@ -4,6 +4,7 @@ import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.entity.Preferences;
+import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
@@ -13,6 +14,10 @@ import com.ahnis.journalai.user.service.AdminService;
 import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +37,14 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toResponseDto)
-                .toList();
+    public Page<UserResponse> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "username")); // Adjust the sorting as needed
+        Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(userMapper::toResponseDto);
     }
+
 
     @Override
     public void enableUser(String userId) {

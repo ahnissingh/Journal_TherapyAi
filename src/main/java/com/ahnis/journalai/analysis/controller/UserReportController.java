@@ -5,6 +5,7 @@ import com.ahnis.journalai.analysis.service.ReportService;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +20,15 @@ public class UserReportController {
 
     // View all reports for the authenticated user
     @GetMapping
-    public ResponseEntity<ApiResponse<List<MoodReportApiResponse>>> getAllReports(
-            @AuthenticationPrincipal User user) {
-        List<MoodReportApiResponse> reports = reportService.getAllReportsByUserId(user.getId());
+    public ResponseEntity<ApiResponse<Page<MoodReportApiResponse>>> getAllReports(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<MoodReportApiResponse> reports = reportService.getAllReportsByUserId(user.getId(), page, size);
         return ResponseEntity.ok(ApiResponse.success(reports));
     }
+
 
     // View a specific report for the authenticated user
     @GetMapping("/{reportId}")

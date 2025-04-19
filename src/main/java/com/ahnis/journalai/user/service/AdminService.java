@@ -3,13 +3,14 @@ package com.ahnis.journalai.user.service;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.dto.response.UserResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface AdminService {
 
     //new methods
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(int page, int size);
 
     void enableUser(String userId);
 

@@ -5,6 +5,7 @@ import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
 import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.entity.Therapist;
+import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.exception.ConflictException;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.repository.TherapistRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Flow;
 
 @Service
@@ -31,7 +33,7 @@ public class TherapistService {
     private final MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
 
-    
+
     public List<TherapistResponse> search(
             String specialty,
             String username
@@ -64,9 +66,8 @@ public class TherapistService {
                 .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found", userId));
-
         if (user.getTherapistId() != null) {
-            throw new ConflictException("Therapist is already subscribed");
+            throw new ConflictException("User already subscribed to therapist,Unsubscribe them first");
         }
 
         // Updating both sides of relationship ie one to many
@@ -116,12 +117,16 @@ public class TherapistService {
         therapistRepository.save(therapist);
     }
 
-    public List<TherapistClientResponse> getClients(String therapistId) {
-        Therapist therapist = therapistRepository.findById(therapistId)
-                .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
+    public Page<TherapistClientResponse> getClients(Set<String> clientUserIds, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);  // Create a pageable object with given page and size
 
-        return userRepository.findAllById(therapist.getClientUserId()).stream()
-                .map(TherapistClientResponse::fromUser)
-                .toList();
+        // Fetch the clients using the `clientUserIds` set and `Pageable` object
+        Page<User> clientsPage = userRepository.findAllByIdIn(clientUserIds, pageable);
+
+        // Map the page of users to a page of TherapistClientResponse
+        return clientsPage.map(TherapistClientResponse::fromUser);
     }
+
+
+
 }

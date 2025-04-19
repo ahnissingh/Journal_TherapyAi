@@ -13,6 +13,10 @@ import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -57,14 +61,13 @@ public class JournalServiceImpl implements JournalService {
             log.error("Failed to create journal: {}", e.getMessage());
         }
     }
-
     @Override
-    public List<JournalResponse> getAllJournals(String userId) {
-        return journalRepository.findByUserId(userId)
-                .stream()
-                .map(journalMapper::toDto)
-                .toList();
+    public Page<JournalResponse> getAllJournals(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")); // Optional sort
+        Page<Journal> journalPage = journalRepository.findByUserId(userId, pageable);
+        return journalPage.map(journalMapper::toDto);
     }
+
 
     @Override
     public JournalResponse getJournalById(String id, String userId) {

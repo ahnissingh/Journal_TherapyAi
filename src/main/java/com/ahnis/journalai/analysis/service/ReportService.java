@@ -2,6 +2,7 @@ package com.ahnis.journalai.analysis.service;
 
 import com.ahnis.journalai.analysis.dto.MoodReportApiResponse;
 import com.ahnis.journalai.analysis.dto.MoodReportEmailResponse;
+import com.ahnis.journalai.analysis.entity.MoodReportEntity;
 import com.ahnis.journalai.analysis.exception.ReportNotFoundException;
 import com.ahnis.journalai.analysis.mapper.ReportMapper;
 import com.ahnis.journalai.analysis.repository.ReportRepository;
@@ -9,6 +10,10 @@ import com.ahnis.journalai.notification.service.NotificationService;
 import com.ahnis.journalai.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,12 +63,12 @@ public class ReportService {
         }
     }
 
-
-    public List<MoodReportApiResponse> getAllReportsByUserId(String userId) {
-        return reportRepository.findByUserId(userId).stream()
-                .map(reportMapper::toApiResponse)
-                .toList();
+    public Page<MoodReportApiResponse> getAllReportsByUserId(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")); // Optional sort
+        Page<MoodReportEntity> reportPage = reportRepository.findByUserId(userId, pageable);
+        return reportPage.map(reportMapper::toApiResponse);
     }
+
 
     public MoodReportApiResponse getReportById(String userId, String reportId) {
         return reportRepository.findByIdAndUserId(reportId, userId)
