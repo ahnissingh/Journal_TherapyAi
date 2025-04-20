@@ -1,5 +1,8 @@
 package com.ahnis.journalai;
 
+import com.ahnis.journalai.journal.embedding.JournalEmbeddingService;
+import com.ahnis.journalai.journal.entity.Journal;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.vectorstore.milvus.autoconfigure.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +15,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 
 @Slf4j
 @SpringBootApplication(exclude = MilvusVectorStoreAutoConfiguration.class)
@@ -26,6 +33,7 @@ import java.util.TimeZone;
 public class JournalAi2Application {
 
 
+
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         //todo dont remove this is actually being used
@@ -33,8 +41,8 @@ public class JournalAi2Application {
         SpringApplication.run(JournalAi2Application.class, args);
     }
 
-
 }
+
 
 
 

@@ -42,7 +42,8 @@ app:
   password-reset-url: "/api/v1/auth/reset-password"
 security:
   allowedOrigins:
-    - "http://localhost:63342"
+    - "http://localhost:8081"
+    - "http://localhost:5173"
 
 jwt:
   secret: ${JWT_SECRET_KEY}
@@ -80,14 +81,14 @@ management:
         include: "*"
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
 
-#logging:
-#  level:
-##    com.sendgrid.*: debug
-##    org.springframework.scheduling.annotation: DEBUG
-##    org.springframework.*: debug
-##    com.datastax.oss: debug
-##    org.bson.*: debug
-##    org.springframework.data: debug
+logging:
+  level:
+    com.sendgrid.*: debug
+    org.springframework.scheduling.annotation: DEBUG
+    org.springframework.*: debug
+    com.datastax.oss: debug
+    org.bson.*: debug
+    org.springframework.data: debug
 scheduler:
   remind-users:
     cron: "0 56 19 * * ?"   # 7:52 PM IST

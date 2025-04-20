@@ -5,6 +5,7 @@ import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.*;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
@@ -12,11 +13,14 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +46,11 @@ import java.util.function.Consumer;
  * Written by: Ahnis Singh
  * </p>
  */
+@Slf4j
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
+    private final VectorStore vectorStore;
 
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
@@ -58,12 +64,13 @@ public class ChatServiceImpl implements ChatService {
      * @param chatMemory The {@link ChatMemory} used for short-term conversation memory.
      */
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools) {
+    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools, VectorStore vectorStore) {
         this.chatClient = chatClient.defaultAdvisors(List.of(
                         new MessageChatMemoryAdvisor(chatMemory)
                 ))
                 .defaultTools(chatbotTools)
                 .build();
+        this.vectorStore = vectorStore;
     }
 
     /**
@@ -138,10 +145,18 @@ public class ChatServiceImpl implements ChatService {
      * @return A {@link Consumer} that configures the {@link ChatClient.AdvisorSpec} with the necessary advisors and parameters.
      */
     private Consumer<ChatClient.AdvisorSpec> advisorSpecification(String userId, String message, String conversationId) {
+        // Format dates to match what works in similaritySearch
+        Instant now = Instant.now();
+        Instant startDate = now.minus(0, ChronoUnit.DAYS);
+        log.info("Start Date and end date {} {}", startDate, now);
+
         return advisorSpec -> advisorSpec
+                .advisors(new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder()
+                        .filterExpression("userId == '" + userId + "'")
+                        .topK(3)
+                        .build()))
                 .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                 .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5);
-
     }
 
     /**

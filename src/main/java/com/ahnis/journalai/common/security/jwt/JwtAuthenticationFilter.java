@@ -31,20 +31,12 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
-    @Qualifier("requestMappingHandlerMapping")
-    private final RequestMappingHandlerMapping publicEndpointMatcher;
     private final RequestAttributeSecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
-
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, ObjectMapper objectMapper, @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping publicEndpointMatcher) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-        this.objectMapper = objectMapper;
-        this.publicEndpointMatcher = publicEndpointMatcher;
-    }
 
 
     @Override

@@ -47,15 +47,22 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(customCorsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/auth/register/**").permitAll()
-                        .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
-                        .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
-                        .anyRequest().authenticated()
+                                .requestMatchers(
+                                        "/api/v1/auth/**",
+                                        "/api/v1/auth/register/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs",
+                                        "/v3/api-docs/**",
+                                        "/v3/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
+                                ).permitAll()
+                                .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
+                                .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
                     exception.defaultAuthenticationEntryPointFor(authenticationEntryPoint,
@@ -79,15 +86,22 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     public RequestMatcher publicEndpointsRequestMatcher() {
         return new OrRequestMatcher(
                 new AntPathRequestMatcher("/api/v1/auth/register/**"),
                 new AntPathRequestMatcher("/api/v1/auth/**"),
+                new AntPathRequestMatcher("/swagger-ui.html"),
                 new AntPathRequestMatcher("/swagger-ui/**"),
-                new AntPathRequestMatcher("/v3/api-docs/**")
+                new AntPathRequestMatcher("/v3/api-docs"),
+                new AntPathRequestMatcher("/v3/api-docs/**"),
+                new AntPathRequestMatcher("/v3/**"),
+                new AntPathRequestMatcher("/swagger-resources/**"),
+                new AntPathRequestMatcher("/webjars/**")
         );
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
