@@ -41,3 +41,7 @@ build/
 .vscode/
 /src/main/resources/bootstrap/users.json
 /volumes/
+!/src/test/java/com/ahnis/journalai/user/TestPlan.md
+!/src/test/java/com/ahnis/journalai/user/TestSummary.md
+
+!/src/test/java/com/ahnis/journalai/user/TestPlan.md

@@ -74,8 +74,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Update("{ '$set' : { 'nextReportOn' : ?1 } }")
     void updateByUsernameAndNextReportOn(String username, Instant nextReportOn);
 
-    @Query("{ 'username' : ?0 }")
-    @DeleteQuery
+    @Query(value = "{ 'username' : ?0 }", delete = true)
     long deleteByUsername(String username);
 
     @Query("{ 'username' : ?0 }")
