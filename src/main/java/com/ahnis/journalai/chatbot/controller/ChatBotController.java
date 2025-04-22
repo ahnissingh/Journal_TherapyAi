@@ -47,7 +47,8 @@ public class ChatBotController {
      * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
      */
     @PostMapping()
-    public ResponseEntity<ApiResponse<ChatResponse>> chat(
+    public ResponseEntity<ApiResponse<ChatResponse>> chat
+    (
             @RequestBody ChatRequest chatRequest,
             @AuthenticationPrincipal User user
     ) {

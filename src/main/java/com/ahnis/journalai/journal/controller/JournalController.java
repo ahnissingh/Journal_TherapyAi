@@ -5,6 +5,7 @@ import com.ahnis.journalai.journal.dto.request.JournalRequest;
 import com.ahnis.journalai.journal.dto.response.JournalResponse;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.journal.service.JournalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class JournalController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> createJournal(
-            @RequestBody JournalRequest dto,
+            @Valid @RequestBody JournalRequest dto,
             @AuthenticationPrincipal User user
     ) {
         journalService.createJournal(dto, user.getId());
@@ -53,7 +54,7 @@ public class JournalController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<JournalResponse>> updateJournal(
             @PathVariable String id,
-            @RequestBody JournalRequest dto,
+            @Valid @RequestBody JournalRequest dto,
             @AuthenticationPrincipal User user
     ) {
         JournalResponse updatedJournal = journalService.updateJournal(id, dto, user.getId());

@@ -90,15 +90,9 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ 'preferences.remindersEnabled': ?0 }")
     List<User> findByRemindersEnabled(boolean remindersEnabled);
 
-    @Aggregation(pipeline = {
-            "{ $match: { nextReportOn: { $gte: ?0, $lt: ?1 } } }", // Filter users with nextReportOn within the current day
-            "{ $lookup: { from: 'journals', localField: 'id', foreignField: 'userId', as: 'journals' } }", // Join with journals collection
-            "{ $match: { journals: { $not: { $size: 0 } } } }", // Filter users with at least one journal
-            "{ $project: { journals: 0 } }" // Exclude journals from the result
-    })
-    List<User> findUsersDueForReportWithJournals(Instant startOfDay, Instant endOfDay);
-
 
     Page<User> findAllByIdIn(Set<String> userIds, Pageable pageable);
+
+    boolean existsByUsername(String username);
 
 }

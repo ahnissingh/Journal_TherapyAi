@@ -6,6 +6,7 @@ import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.dto.response.UserResponse;
 import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
+import com.ahnis.journalai.user.service.UserService;
 import com.ahnis.journalai.user.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    private final UserServiceImpl userService;
+
+    private final UserService userService;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(

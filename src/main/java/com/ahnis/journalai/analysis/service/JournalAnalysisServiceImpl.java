@@ -60,7 +60,7 @@ public class JournalAnalysisServiceImpl implements JournalAnalysisService {
         return CompletableFuture.completedFuture(moodReportEmailResponse);
     }
 
-    private static String generatePromptForUser(String username, Preferences userPreferences, String combinedContent) {
+    static String generatePromptForUser(String username, Preferences userPreferences, String combinedContent) {
         String promptTemplate = """
                 Analyze the mood of the following journal entries and provide a summary.
                 DO NOT JUDGE ANY OTHER EMOTIONS OTHER THAN ONLY ALLOWED EMOTIONS are happiness, sadness, anger, fear, surprise, and disgust.
