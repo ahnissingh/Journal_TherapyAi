@@ -27,13 +27,13 @@ import java.util.Set;
 @Document(collection = "therapists")
 //For faster searching
 //never add >1 array index
-//@CompoundIndex(name = "search_idx", def = """
-//            {
-//                specialties: 1,
-//                firstname: 1,
-//                lastname:1,
-//            }
-//        """)
+@CompoundIndex(name = "search_idx", def = """
+            {
+                specialties: 1,
+                firstname: 1,
+                lastname:1,
+            }
+        """)
 public class Therapist implements UserDetails {
     @Id
     private String id;

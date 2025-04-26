@@ -23,7 +23,7 @@ import java.time.Instant;
 public class Journal {
 
     @Id
-    private String id; //Automatically converted to ObjectId
+    private String id;
     private String title;
     private String content;
     @Indexed
@@ -33,6 +33,6 @@ public class Journal {
     private Instant modifiedAt;
     @Indexed
     @Field(targetType = FieldType.OBJECT_ID)
-    private String userId; //added index for user id
+    private String userId;
 }
 

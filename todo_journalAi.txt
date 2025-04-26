@@ -13,7 +13,7 @@ This document outlines the pending features, enhancements, and improvements for 
     Pagination for Admin Controller: Add paginated API support for admin-level endpoints (user listings, search, etc.).
 2️⃣ Journal Module
 ✨ Features & Enhancements
-//todo Journal Pagination: Add paginated responses for user journals to improve performance and scalability.
+// Journal Pagination: Add paginated responses for user journals to improve performance and scalability.
 
 //DONE: Journaling Reminders: Implement configurable reminders (push/email) to nudge users to write journals based on their preferences.
 

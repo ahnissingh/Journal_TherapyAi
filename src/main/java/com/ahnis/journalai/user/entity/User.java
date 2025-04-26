@@ -27,9 +27,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Document(collection = "users")
 public class User implements UserDetails {
-    //generic fields
     @Id
-    private String id; //Automatically to object id
+    private String id;
     @Indexed(unique = true)
     private String username;
     @Indexed(unique = true)
@@ -44,16 +43,16 @@ public class User implements UserDetails {
     private Set<Role> roles = new HashSet<>();
 
     @Builder.Default
-    private boolean enabled = true; // Default to true
+    private boolean enabled = true;
 
     @Builder.Default
-    private boolean accountNonLocked = true; // Default to true
+    private boolean accountNonLocked = true;
 
     @Builder.Default
-    private boolean accountNonExpired = true; // Default to true
+    private boolean accountNonExpired = true;
 
     @Builder.Default
-    private boolean credentialsNonExpired = true; // Default to true
+    private boolean credentialsNonExpired = true;
 
     @CreatedDate
     private Instant createdAt;
