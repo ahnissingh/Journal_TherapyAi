@@ -5,11 +5,11 @@ import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.*;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -50,6 +49,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Service
 @Primary
+@RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
@@ -59,21 +59,6 @@ public class ChatServiceImpl implements ChatService {
     @Value("classpath:templates/chatbot/chatbot-template.st")
     private Resource userChatbotPromptTemplateResource;
 
-    /**
-     * Constructs a new instance of {@link ChatServiceImpl}.
-     *
-     * @param chatClient The {@link ChatClient.Builder} used to build the chat client.
-     * @param chatMemory The {@link ChatMemory} used for short-term conversation memory.
-     */
-
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools, VectorStore vectorStore) {
-        this.chatClient = chatClient.defaultAdvisors(List.of(
-                        new MessageChatMemoryAdvisor(chatMemory)
-                ))
-                .defaultTools(chatbotTools)
-                .build();
-        this.vectorStore = vectorStore;
-    }
 
     /**
      * Handles synchronous chat interactions with the user.

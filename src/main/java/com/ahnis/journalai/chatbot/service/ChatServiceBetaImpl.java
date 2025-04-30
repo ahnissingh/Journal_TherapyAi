@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 @Service
 @Slf4j
-
+@RequiredArgsConstructor
 public class ChatServiceBetaImpl implements ChatService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
@@ -41,17 +41,6 @@ public class ChatServiceBetaImpl implements ChatService {
     private Resource systemMessageResource;
     @Value("classpath:templates/chatbot/chatbot-template.st")
     private Resource userChatbotPromptTemplateResource;
-
-
-    public ChatServiceBetaImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools, VectorStore vectorStore, ChatSessionService chatSessionService) {
-        this.chatClient = chatClient.defaultAdvisors(List.of(
-                        new MessageChatMemoryAdvisor(chatMemory)
-                ))
-                .defaultTools(chatbotTools)
-                .build();
-        this.vectorStore = vectorStore;
-        this.chatSessionService = chatSessionService;
-    }
 
 
     public ChatResponse chatSync(User user, ChatRequest chatRequest) {
