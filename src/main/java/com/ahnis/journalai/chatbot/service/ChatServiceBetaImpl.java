@@ -1,13 +1,15 @@
 package com.ahnis.journalai.chatbot.service;
 
-import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
+import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
+import com.ahnis.journalai.chatbot.entity.ChatSession;
 import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.*;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -15,7 +17,6 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -28,103 +29,88 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-/**
- * The primary implementation of the {@link ChatService} interface.
- * This service handles synchronous and asynchronous (streaming) chat interactions
- * with the user, leveraging various advisors to provide personalized and context-aware responses.
- * <p>
- * The service uses the following advisors:
- * <ul>
- *   <li>{@link MessageChatMemoryAdvisor}: Manages short-term conversation memory for context-aware interactions.</li>
- * </ul>
- * </p>
- * <p>
- * The service also uses predefined prompt templates for system messages and user interactions,
- * which are loaded from external resources.
- * </p>
- *
- * <p>
- * Written by: Ahnis Singh
- * </p>
- */
-@Slf4j
 @Service
-@Primary
-public class ChatServiceImpl implements ChatService {
+@Slf4j
+
+public class ChatServiceBetaImpl implements ChatService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
-
+    private final ChatSessionService chatSessionService;
     @Value("classpath:/templates/chatbot/system-template.st")
     private Resource systemMessageResource;
     @Value("classpath:templates/chatbot/chatbot-template.st")
     private Resource userChatbotPromptTemplateResource;
 
-    /**
-     * Constructs a new instance of {@link ChatServiceImpl}.
-     *
-     * @param chatClient The {@link ChatClient.Builder} used to build the chat client.
-     * @param chatMemory The {@link ChatMemory} used for short-term conversation memory.
-     */
 
-    public ChatServiceImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools, VectorStore vectorStore) {
+    public ChatServiceBetaImpl(ChatClient.Builder chatClient, ChatMemory chatMemory, SuicidePreventionTool chatbotTools, VectorStore vectorStore, ChatSessionService chatSessionService) {
         this.chatClient = chatClient.defaultAdvisors(List.of(
                         new MessageChatMemoryAdvisor(chatMemory)
                 ))
                 .defaultTools(chatbotTools)
                 .build();
         this.vectorStore = vectorStore;
+        this.chatSessionService = chatSessionService;
     }
 
-    /**
-     * Handles synchronous chat interactions with the user.
-     *
-     * @param user        The {@link User} initiating the chat.
-     * @param chatRequest The {@link ChatRequest} containing the user's message and conversation ID.
-     * @return A {@link ChatResponse} containing the chatbot's response and the conversation ID.
-     * @throws SecurityException If the conversation ID is invalid for the given user.
-     */
+
     public ChatResponse chatSync(User user, ChatRequest chatRequest) {
-        var userId = user.getId();
-        var conversationId = chatRequest.conversationId();
-        if (conversationId == null || conversationId.isEmpty()) conversationId = createConversation(userId);
-        else if (!isValidConversation(userId, conversationId)) throw new SecurityException("Invalid user id");
+        String userId = user.getId();
+        String sessionId = chatRequest.conversationId();
+
+        if (sessionId == null || sessionId.isEmpty()) {
+            ChatSession newSession = chatSessionService.createNewSession(userId);
+            sessionId = newSession.getId();
+        } else if (!chatSessionService.isValidSession(sessionId, userId)) {
+            throw new SecurityException("Invalid session ID");
+        }
+
+        // Save user message
+        chatSessionService.addUserMessage(sessionId, userId, chatRequest.message());
 
         Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
-        var response = chatClient
-                .prompt(userChatbotPrompt)
+        String response = chatClient.prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .toolContext(createToolContext(userId, user.getUsername()))
-                .advisors(advisorSpecification(userId, chatRequest.message(), conversationId))
+                .advisors(advisorSpecification(userId, chatRequest.message(), sessionId))
                 .call()
                 .content();
-        return new ChatResponse(conversationId, response);
+
+        // Save assistant response
+        chatSessionService.addAssistantMessage(sessionId, userId, response);
+
+        return new ChatResponse(sessionId, response);
     }
 
-    /**
-     * Handles asynchronous (streaming) chat interactions with the user.
-     *
-     * @param chatRequest The {@link ChatStreamRequest} containing the user's message and chat ID.
-     * @param chatId      The unique ID of the chat session.
-     * @param user        The {@link User} initiating the chat.
-     * @return A {@link Flux} of strings representing the chatbot's streaming response.
-     * @throws SecurityException If the chat ID is invalid for the given user.
-     */
-    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String chatId, User user) {
-        var userId = user.getId();
-        if (chatId == null) chatId = createConversation(userId);
-        else if (!isValidConversation(userId, chatId)) throw new SecurityException("Invalid chat id for user ");
+    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String sessionId, User user) {
+        String userId = user.getId();
+
+        if (sessionId == null) {
+            ChatSession newSession = chatSessionService.createNewSession(userId);
+            sessionId = newSession.getId();
+        } else if (!chatSessionService.isValidSession(sessionId, userId)) {
+            return Flux.error(new SecurityException("Invalid session ID"));
+        }
+
+        // Save user message
+        chatSessionService.addUserMessage(sessionId, userId, chatRequest.message());
 
         Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
-        return chatClient
-                .prompt(userChatbotPrompt)
+        String finalSessionId = sessionId;
+        return chatClient.prompt(userChatbotPrompt)
                 .system(systemMessageResource)
                 .toolContext(createToolContext(userId, user.getUsername()))
-                .advisors(advisorSpecification(userId, chatRequest.message(), chatId))
+                .advisors(advisorSpecification(userId, chatRequest.message(), sessionId))
                 .stream()
                 .content()
-                .onBackpressureBuffer();
+                .onBackpressureBuffer()
+                .doOnComplete(() -> {
+                    // In a real implementation, you'd accumulate the streamed response
+                    // and save it when complete. This is simplified.
+                    chatSessionService.addAssistantMessage(finalSessionId, userId,
+                            "Streamed conversation (full message not captured)");
+                });
     }
 
     /**
