@@ -3,6 +3,7 @@ package com.ahnis.journalai.chatbot.service;
 
 import com.ahnis.journalai.chatbot.entity.ChatSession;
 import com.ahnis.journalai.chatbot.dto.ChatMessage;
+import com.ahnis.journalai.chatbot.exception.InvalidSessionException;
 import com.ahnis.journalai.chatbot.repository.ChatSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +60,7 @@ public class ChatSessionService {
 
     public void deleteSession(String sessionId, String userId) {
         if (!chatSessionRepository.existsByIdAndUserId(sessionId, userId)) {
-            throw new SecurityException("Invalid session ID for user");
+            throw new InvalidSessionException("Invalid session ID for user");
         }
         chatSessionRepository.deleteById(sessionId);
     }
