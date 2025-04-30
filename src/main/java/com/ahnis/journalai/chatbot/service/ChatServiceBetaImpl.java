@@ -82,6 +82,36 @@ public class ChatServiceBetaImpl implements ChatService {
         return new ChatResponse(sessionId, response);
     }
 
+    //    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String sessionId, User user) {
+//        String userId = user.getId();
+//
+//        if (sessionId == null) {
+//            ChatSession newSession = chatSessionService.createNewSession(userId);
+//            sessionId = newSession.getId();
+//        } else if (!chatSessionService.isValidSession(sessionId, userId)) {
+//            return Flux.error(new SecurityException("Invalid session ID"));
+//        }
+//
+//        // Save user message
+//        chatSessionService.addUserMessage(sessionId, userId, chatRequest.message());
+//
+//        Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
+//
+//        String finalSessionId = sessionId;
+//        return chatClient.prompt(userChatbotPrompt)
+//                .system(systemMessageResource)
+//                .toolContext(createToolContext(userId, user.getUsername()))
+//                .advisors(advisorSpecification(userId, chatRequest.message(), sessionId))
+//                .stream()
+//                .content()
+//                .onBackpressureBuffer()
+//                .doOnComplete(() -> {
+//                    // In a real implementation, you'd accumulate the streamed response
+//                    // and save it when complete. This is simplified.
+//                    chatSessionService.addAssistantMessage(finalSessionId, userId,
+//                            "Streamed conversation (full message not captured)");
+//                });
+//    }
     public Flux<String> chatFlux(ChatStreamRequest chatRequest, String sessionId, User user) {
         String userId = user.getId();
 
@@ -97,6 +127,9 @@ public class ChatServiceBetaImpl implements ChatService {
 
         Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
 
+        // Just collect the whole response as a string
+        StringBuilder fullResponse = new StringBuilder();
+        //Final reference required for lambda exp
         String finalSessionId = sessionId;
         return chatClient.prompt(userChatbotPrompt)
                 .system(systemMessageResource)
@@ -104,12 +137,13 @@ public class ChatServiceBetaImpl implements ChatService {
                 .advisors(advisorSpecification(userId, chatRequest.message(), sessionId))
                 .stream()
                 .content()
-                .onBackpressureBuffer()
+                .map(chunk -> {
+                    fullResponse.append(chunk); // Collect chunks
+                    return chunk; // Still stream each chunk to client
+                })
                 .doOnComplete(() -> {
-                    // In a real implementation, you'd accumulate the streamed response
-                    // and save it when complete. This is simplified.
-                    chatSessionService.addAssistantMessage(finalSessionId, userId,
-                            "Streamed conversation (full message not captured)");
+                    // Save complete response when done
+                    chatSessionService.addAssistantMessage(finalSessionId, userId, fullResponse.toString());
                 });
     }
 
