@@ -4,6 +4,7 @@ import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.entity.ChatSession;
+import com.ahnis.journalai.chatbot.exception.InvalidSessionException;
 import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,7 @@ public class ChatServiceBetaImpl implements ChatService {
             ChatSession newSession = chatSessionService.createNewSession(userId);
             sessionId = newSession.getId();
         } else if (!chatSessionService.isValidSession(sessionId, userId)) {
-            throw new SecurityException("Invalid session ID");
+            throw new InvalidSessionException("Invalid session ID");
         }
 
         // Save user message
@@ -119,7 +120,7 @@ public class ChatServiceBetaImpl implements ChatService {
             ChatSession newSession = chatSessionService.createNewSession(userId);
             sessionId = newSession.getId();
         } else if (!chatSessionService.isValidSession(sessionId, userId)) {
-            return Flux.error(new SecurityException("Invalid session ID"));
+            return Flux.error(new InvalidSessionException("Invalid session ID"));
         }
 
         // Save user message

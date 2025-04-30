@@ -1,6 +1,7 @@
 package com.ahnis.journalai.common.exception;
 
 import com.ahnis.journalai.analysis.exception.ReportNotFoundException;
+import com.ahnis.journalai.chatbot.exception.InvalidSessionException;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.common.dto.ErrorDetails;
 import com.ahnis.journalai.common.dto.ValidationErrorDetails;
@@ -60,6 +61,17 @@ public class GlobalExceptionHandler {
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
+
+    @ExceptionHandler({InvalidSessionException.class})
+    public ResponseEntity<ErrorDetails> invalidSessionException(InvalidSessionException ex, WebRequest request) {
+        ErrorDetails details = new ErrorDetails(
+                LocalDateTime.now(),
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(details, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(ReportNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleReportNotFoundException(ReportNotFoundException ex) {
         ErrorDetails errorDetails = new ErrorDetails(
@@ -69,6 +81,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler({UserNotFoundException.class})
     public ResponseEntity<ErrorDetails> handleUserNotFound(
             UserNotFoundException ex, WebRequest request) {
