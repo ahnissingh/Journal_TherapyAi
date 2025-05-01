@@ -10,7 +10,6 @@ import com.ahnis.journalai.chatbot.service.ChatSessionService;
 import com.ahnis.journalai.chatbot.dto.ChatRequest;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.entity.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

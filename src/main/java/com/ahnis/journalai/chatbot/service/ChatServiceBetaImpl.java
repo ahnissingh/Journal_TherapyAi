@@ -5,14 +5,12 @@ import com.ahnis.journalai.chatbot.dto.ChatResponse;
 import com.ahnis.journalai.chatbot.dto.ChatStreamRequest;
 import com.ahnis.journalai.chatbot.entity.ChatSession;
 import com.ahnis.journalai.chatbot.exception.InvalidSessionException;
-import com.ahnis.journalai.chatbot.tools.SuicidePreventionTool;
 import com.ahnis.journalai.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -25,9 +23,7 @@ import reactor.core.publisher.Flux;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 @Service
@@ -72,36 +68,6 @@ public class ChatServiceBetaImpl implements ChatService {
         return new ChatResponse(sessionId, response);
     }
 
-    //    public Flux<String> chatFlux(ChatStreamRequest chatRequest, String sessionId, User user) {
-//        String userId = user.getId();
-//
-//        if (sessionId == null) {
-//            ChatSession newSession = chatSessionService.createNewSession(userId);
-//            sessionId = newSession.getId();
-//        } else if (!chatSessionService.isValidSession(sessionId, userId)) {
-//            return Flux.error(new SecurityException("Invalid session ID"));
-//        }
-//
-//        // Save user message
-//        chatSessionService.addUserMessage(sessionId, userId, chatRequest.message());
-//
-//        Prompt userChatbotPrompt = createUserChatBotPrompt(user, chatRequest.message());
-//
-//        String finalSessionId = sessionId;
-//        return chatClient.prompt(userChatbotPrompt)
-//                .system(systemMessageResource)
-//                .toolContext(createToolContext(userId, user.getUsername()))
-//                .advisors(advisorSpecification(userId, chatRequest.message(), sessionId))
-//                .stream()
-//                .content()
-//                .onBackpressureBuffer()
-//                .doOnComplete(() -> {
-//                    // In a real implementation, you'd accumulate the streamed response
-//                    // and save it when complete. This is simplified.
-//                    chatSessionService.addAssistantMessage(finalSessionId, userId,
-//                            "Streamed conversation (full message not captured)");
-//                });
-//    }
     public Flux<String> chatFlux(ChatStreamRequest chatRequest, String sessionId, User user) {
         String userId = user.getId();
 
@@ -191,27 +157,6 @@ public class ChatServiceBetaImpl implements ChatService {
         userPreferencesMap.put("timeZone", user.getTimezone());
         userPreferencesMap.put("userMessage", chatRequestMessage);
         return userChatbotPromptTemplate.create(userPreferencesMap);
-    }
-
-    /**
-     * Generates a new conversation ID in the format "userId:conversationId".
-     *
-     * @param userId The unique ID of the user.
-     * @return A new conversation ID.
-     */
-    private String createConversation(String userId) {
-        return userId + ":" + UUID.randomUUID();
-    }
-
-    /**
-     * Validates that the conversation ID belongs to the given user.
-     *
-     * @param userId         The unique ID of the user.
-     * @param conversationId The conversation ID to validate.
-     * @return {@code true} if the conversation ID is valid for the user, {@code false} otherwise.
-     */
-    private boolean isValidConversation(String userId, String conversationId) {
-        return conversationId.startsWith(userId + ":");
     }
 
     private static Map<String, Object> createToolContext(String userId, String username) {

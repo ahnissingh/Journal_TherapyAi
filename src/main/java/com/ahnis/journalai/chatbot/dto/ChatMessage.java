@@ -10,7 +10,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessage {
-    private String role; // "USER" or "ASSISTANT"
+    private String role;
     private String content;
     private Instant timestamp;
 }
