@@ -1,3 +1,15 @@
+server:
+  port: 8443
+  http2:
+    enabled: true
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-type: PKCS12
+    key-alias: myapp
+    key-password: ${SSL_KEYSTORE_PASSWORD}  # Replace this with the password you entered during key generation
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+
 spring:
   cache:
     type: CAFFEINE
@@ -81,14 +93,14 @@ management:
         include: "*"
       base-path: "/monitor"  # Moves all Actuator endpoints under "/monitor"
 
-logging:
-  level:
-    com.sendgrid.*: debug
-    org.springframework.scheduling.annotation: DEBUG
-    org.springframework.*: debug
-    com.datastax.oss: debug
-    org.bson.*: debug
-    org.springframework.data: debug
+#logging:
+#  level:
+#    com.sendgrid.*: debug
+#    org.springframework.scheduling.annotation: DEBUG
+#    org.springframework.*: debug
+#    com.datastax.oss: debug
+#    org.bson.*: debug
+#    org.springframework.data: debug
 scheduler:
   remind-users:
     cron: "0 56 19 * * ?"   # 7:52 PM IST

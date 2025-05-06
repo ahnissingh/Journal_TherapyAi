@@ -45,24 +45,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .requiresChannel(channel ->
+                        channel.anyRequest().requiresSecure())
                 .cors(cors -> cors.configurationSource(customCorsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-                                        "/api/v1/auth/**",
-                                        "/api/v1/auth/register/**",
-                                        "/swagger-ui.html",
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs",
-                                        "/v3/api-docs/**",
-                                        "/v3/**",
-                                        "/swagger-resources/**",
-                                        "/webjars/**"
-                                ).permitAll()
-                                .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
-                                .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
-                                .anyRequest().authenticated()
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/api/v1/auth/register/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/v3/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/api/admin").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/monitor/**").hasRole(Role.ADMIN.name()) //admin user end point
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> {
                     exception.defaultAuthenticationEntryPointFor(authenticationEntryPoint,
