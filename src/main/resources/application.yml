@@ -7,7 +7,7 @@ server:
     key-store: classpath:keystore.p12
     key-store-type: PKCS12
     key-alias: myapp
-    key-password: ${SSL_KEYSTORE_PASSWORD}  # Replace this with the password you entered during key generation
+    key-password: ${SSL_KEYSTORE_PASSWORD}
     key-store-password: ${SSL_KEYSTORE_PASSWORD}
 
 spring:
@@ -115,10 +115,7 @@ milvus:
     token: ${MILVUS_CLOUD_TOKEN}
     username: ${MILVUS_CLOUD_USERNAME}
     password: ${MILVUS_CLOUD_PASSWORD}
-
 vector:
-  batching:
-    enabled: false
   store:
     database-name: ${VECTOR_STORE_DATABASE_NAME:default}
     collection-name: ${VECTOR_STORE_COLLECTION_NAME:vector_store1}
