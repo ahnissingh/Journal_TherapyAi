@@ -1,6 +1,0 @@
-jLDNI5KYkNBg1wIK
-
-mongodb+srv://ahnisaneja:jLDNI5KYkNBg1wIK@cluster-journal-ai.qokch.mongodb.net/
-
-
-mongodb+srv://ahnisaneja:<passsword>@cluster-journal-ai.qokch.mongodb.net/
