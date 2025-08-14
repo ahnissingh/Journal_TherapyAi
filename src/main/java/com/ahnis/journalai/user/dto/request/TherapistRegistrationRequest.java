@@ -24,7 +24,7 @@ public record TherapistRegistrationRequest(
         int yearsOfExperience,
         @Size(max = 500)
         String bio,
-        @NotEmpty Set<Language> spokenLanguages,
+        @NotEmpty Set<Language> languages,
         @NotBlank(message = "Password cannot be blank")
         @Size(min = 6, message = "Password must be at least 6 characters")
         String password,

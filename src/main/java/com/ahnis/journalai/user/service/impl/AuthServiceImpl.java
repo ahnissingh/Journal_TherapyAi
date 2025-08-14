@@ -5,11 +5,10 @@ import com.ahnis.journalai.user.dto.request.AuthRequest;
 import com.ahnis.journalai.user.dto.request.TherapistRegistrationRequest;
 import com.ahnis.journalai.user.dto.request.UserRegistrationRequest;
 import com.ahnis.journalai.user.dto.response.AuthResponse;
-import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
-import com.ahnis.journalai.user.enums.ReportFrequency;
 import com.ahnis.journalai.user.enums.Role;
 import com.ahnis.journalai.user.exception.UsernameOrEmailAlreadyExistsException;
+import com.ahnis.journalai.user.mapper.TherapistMapper;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
@@ -17,7 +16,6 @@ import com.ahnis.journalai.user.service.AuthService;
 import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
@@ -45,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final TherapistRepository therapistRepository;
     private final CaffeineCacheManager cacheManager;
+    private final TherapistMapper therapistMapper;
 
 
     @Override
@@ -91,24 +88,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse registerTherapist(TherapistRegistrationRequest request) {
-        if (therapistRepository.existsByUsernameOrEmail(request.username(), request.email()) ||
-                userRepository.existsByUsernameOrEmail(request.username(), request.email())
-        ) throw new UsernameOrEmailAlreadyExistsException(request.email());
+    public AuthResponse registerTherapist(TherapistRegistrationRequest therapistRegistrationRequest) {
+        if (therapistRepository.existsByUsernameOrEmail(therapistRegistrationRequest.username(), therapistRegistrationRequest.email()) ||
+                userRepository.existsByUsernameOrEmail(therapistRegistrationRequest.username(), therapistRegistrationRequest.email())
+        ) throw new UsernameOrEmailAlreadyExistsException(therapistRegistrationRequest.email());
 
-        var therapist = Therapist.builder()
-                .username(request.username())
-                .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
-                .licenseNumber(request.licenseNumber())
-                .specialties(request.specialties())
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .yearsOfExperience(request.yearsOfExperience())
-                .bio(request.bio())
-                .languages(request.spokenLanguages())
-                .profilePictureUrl(request.profilePictureUrl())
-                .build();
+        var therapist = therapistMapper.toEntity(therapistRegistrationRequest);
+        therapist.setPassword(passwordEncoder.encode(therapistRegistrationRequest.password()));
+
         therapistRepository.save(therapist);
         return buildAuthResponse(therapist);
     }
