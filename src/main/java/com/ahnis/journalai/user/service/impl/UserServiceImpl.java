@@ -1,29 +1,33 @@
 package com.ahnis.journalai.user.service.impl;
 
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
+import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.dto.response.UserResponse;
-import com.ahnis.journalai.user.dto.request.UserUpdateRequest;
 import com.ahnis.journalai.user.entity.Preferences;
+import com.ahnis.journalai.user.entity.Therapist;
+import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.exception.EmailAlreadyExistsException;
-import com.ahnis.journalai.user.exception.UserNotFoundException;
 import com.ahnis.journalai.user.exception.UserNotSubscribedException;
+import com.ahnis.journalai.user.mapper.TherapistMapper;
 import com.ahnis.journalai.user.mapper.UserMapper;
 import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
-import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.service.UserService;
 import com.ahnis.journalai.user.util.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 @Slf4j
 @Service
@@ -35,6 +39,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final TherapistRepository therapistRepository;
+    private final MongoTemplate mongoTemplate;
+    private final TherapistMapper therapistMapper;
 
     @Transactional
     public void updateUserReportDates(User user, Instant nextReportOn, Instant newNextReportOn) {
@@ -52,32 +58,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TherapistResponse getSubscribedTherapist(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found", username));
+        var aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("username").is(username)),
+                Aggregation.lookup("therapists", "therapistId", "_id", "therapist"),
+                Aggregation.unwind("therapist", true),
+                Aggregation.project()
+                        .and("therapist").as("therapist")
+                        .and("therapistId").as("hasTherapist")
+        );
 
-        if (user.getTherapistId() == null) {
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "users", Document.class);
+        if (results.getMappedResults().isEmpty())
+            throw new UsernameNotFoundException("Username not found " + username);
+        Document resultDoc = results.getMappedResults().getFirst();
+
+        if (resultDoc.get("hasTherapist") == null)
             throw new UserNotSubscribedException("No subscribed therapist");
+
+        var therapistDoc = resultDoc.get("therapist", Document.class);
+        var therapist = mongoTemplate.getConverter().read(
+                Therapist.class, therapistDoc
+        );
+        // Apply bio truncation and mapping
+        if (therapist.getBio() != null && therapist.getBio().length() > 100) {
+            therapist.setBio(therapist.getBio().substring(0, 100) + "...");
         }
-
-        return therapistRepository.findById(user.getTherapistId())
-                .map(therapist -> new TherapistResponse(
-                        therapist.getId(),
-                        therapist.getUsername(),//todo remove dont send to client
-                        therapist.getFirstName(),
-                        therapist.getLastName(),
-                        therapist.getSpecialties(),
-                        therapist.getLanguages(),
-                        therapist.getYearsOfExperience(),
-                        therapist.getBio().length() > 100
-                                ? therapist.getBio().substring(0, 100) + "..."
-                                : therapist.getBio(),
-                        therapist.getProfilePictureUrl()
-
-
-//                        presenceService.isTherapistOnline(therapist.getId()) // Optional
-                ))
-                .orElseThrow(() -> new UserNotFoundException("Therapist not found", user.getUsername()));
+        return therapistMapper.toResponseIgnoreUsername(therapist);
     }
+
 
     @Transactional(readOnly = true)
     //OK optimised
