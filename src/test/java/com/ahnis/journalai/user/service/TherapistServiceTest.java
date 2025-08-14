@@ -2,7 +2,7 @@ package com.ahnis.journalai.user.service;
 
 import com.ahnis.journalai.user.dto.request.TherapistUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
-import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
+import com.ahnis.journalai.user.dto.response.TherapistProfileResponse;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
@@ -52,7 +52,7 @@ class TherapistServiceTest {
     private Therapist testTherapist;
     private User testUser;
     private TherapistResponse testTherapistResponse;
-    private TherapistPersonalResponse testTherapistPersonalResponse;
+    private TherapistProfileResponse testTherapistProfileResponse;
     private TherapistUpdateRequest testTherapistUpdateRequest;
 
     @BeforeEach
@@ -88,7 +88,7 @@ class TherapistServiceTest {
             testTherapist.getProfilePictureUrl()
         );
 
-        testTherapistPersonalResponse = TherapistPersonalResponse.fromEntity(testTherapist);
+        testTherapistProfileResponse = TherapistProfileResponse.fromEntity(testTherapist);
 
         testTherapistUpdateRequest = new TherapistUpdateRequest(
             "Updated bio for testing",
@@ -234,7 +234,7 @@ class TherapistServiceTest {
         when(therapistRepository.findById(therapistId)).thenReturn(Optional.of(testTherapist));
 
         // When
-        TherapistPersonalResponse result = therapistServiceImpl.getProfile(therapistId);
+        TherapistProfileResponse result = therapistServiceImpl.getProfile(therapistId);
 
         // Then
         assertNotNull(result);

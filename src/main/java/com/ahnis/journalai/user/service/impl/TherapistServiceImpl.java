@@ -2,7 +2,7 @@ package com.ahnis.journalai.user.service.impl;
 
 import com.ahnis.journalai.user.dto.request.TherapistUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
-import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
+import com.ahnis.journalai.user.dto.response.TherapistProfileResponse;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
@@ -35,7 +35,6 @@ public class TherapistServiceImpl implements TherapistService {
     private final MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
     private final TherapistMapper therapistMapper;
-
 
     @Override
     public List<TherapistResponse> search(
@@ -94,9 +93,9 @@ public class TherapistServiceImpl implements TherapistService {
 
 
     @Override
-    public TherapistPersonalResponse getProfile(String id) {
+    public TherapistProfileResponse getProfile(String id) {
         return therapistRepository.findById(id)
-                .map(TherapistPersonalResponse::fromEntity)
+                .map(therapistMapper::toPersonalResponse)
                 .orElseThrow(() -> new UserNotFoundException("Therapist not found", id));
     }
 
@@ -123,7 +122,7 @@ public class TherapistServiceImpl implements TherapistService {
         Page<User> clientsPage = userRepository.findAllByIdIn(clientUserIds, pageable);
 
         // Map the page of users to a page of TherapistClientResponse
-        return clientsPage.map(TherapistClientResponse::fromUser);
+        return clientsPage.map(therapistMapper::toClientResponse);
     }
 
 

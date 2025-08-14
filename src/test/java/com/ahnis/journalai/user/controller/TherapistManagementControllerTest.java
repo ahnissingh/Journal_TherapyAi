@@ -2,7 +2,7 @@ package com.ahnis.journalai.user.controller;
 
 import com.ahnis.journalai.user.dto.request.TherapistUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
-import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
+import com.ahnis.journalai.user.dto.response.TherapistProfileResponse;
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.enums.Language;
 import com.ahnis.journalai.user.service.TherapistService;
@@ -54,7 +54,7 @@ class TherapistManagementControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private Therapist testTherapist;
-    private TherapistPersonalResponse therapistPersonalResponse;
+    private TherapistProfileResponse therapistProfileResponse;
     private TherapistUpdateRequest therapistUpdateRequest;
     private Page<TherapistClientResponse> therapistClientResponsePage;
 
@@ -106,7 +106,7 @@ class TherapistManagementControllerTest {
                 .build();
 
         // Create test data
-        therapistPersonalResponse = TherapistPersonalResponse.fromEntity(testTherapist);
+        therapistProfileResponse = TherapistProfileResponse.fromEntity(testTherapist);
 
         therapistUpdateRequest = new TherapistUpdateRequest(
                 "Updated bio for testing",
@@ -150,16 +150,16 @@ class TherapistManagementControllerTest {
     @DisplayName("Should get therapist profile successfully")
     void getTherapistProfile_ShouldReturnTherapistPersonalResponse() throws Exception {
         // Given
-        when(therapistServiceImpl.getProfile(anyString())).thenReturn(therapistPersonalResponse);
+        when(therapistServiceImpl.getProfile(anyString())).thenReturn(therapistProfileResponse);
 
         // When/Then
         mockMvc.perform(get("/api/v1/therapists/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(therapistPersonalResponse.id()))
-                .andExpect(jsonPath("$.data.username").value(therapistPersonalResponse.username()))
-                .andExpect(jsonPath("$.data.email").value(therapistPersonalResponse.email()))
-                .andExpect(jsonPath("$.data.firstname").value(therapistPersonalResponse.firstname()))
-                .andExpect(jsonPath("$.data.lastName").value(therapistPersonalResponse.lastName()));
+                .andExpect(jsonPath("$.data.id").value(therapistProfileResponse.id()))
+                .andExpect(jsonPath("$.data.username").value(therapistProfileResponse.username()))
+                .andExpect(jsonPath("$.data.email").value(therapistProfileResponse.email()))
+                .andExpect(jsonPath("$.data.firstname").value(therapistProfileResponse.firstname()))
+                .andExpect(jsonPath("$.data.lastName").value(therapistProfileResponse.lastName()));
     }
 
     @Test

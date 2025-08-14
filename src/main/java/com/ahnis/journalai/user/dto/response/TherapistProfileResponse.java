@@ -6,7 +6,7 @@ import com.ahnis.journalai.user.enums.Language;
 import java.time.Instant;
 import java.util.Set;
 
-public record TherapistPersonalResponse(
+public record TherapistProfileResponse(
         String id,
         String username,
         String email,
@@ -14,15 +14,15 @@ public record TherapistPersonalResponse(
         String lastName,
         String licenseNumber,
         Set<String> specialties,
-        Set<Language> spokenLanguages,
+        Set<Language> languages,
         int yearsOfExperience,
         String bio,
         String profilePictureUrl,
         int clientCount,
         Instant createdAt
 ) {
-    public static TherapistPersonalResponse fromEntity(Therapist therapist) {
-        return new TherapistPersonalResponse(
+    public static TherapistProfileResponse fromEntity(Therapist therapist) {
+        return new TherapistProfileResponse(
                 therapist.getId(),
                 therapist.getUsername(),
                 therapist.getEmail(),

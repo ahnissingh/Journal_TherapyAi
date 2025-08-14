@@ -2,7 +2,7 @@ package com.ahnis.journalai.user.service;
 
 import com.ahnis.journalai.user.dto.request.TherapistUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
-import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
+import com.ahnis.journalai.user.dto.response.TherapistProfileResponse;
 import com.ahnis.journalai.user.dto.response.TherapistResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public interface TherapistService {
     @Transactional
     void subscribe(String userId, String therapistId);
 
-    TherapistPersonalResponse getProfile(String id);
+    TherapistProfileResponse getProfile(String id);
 
     @Transactional
     void updateProfile(String therapistId, TherapistUpdateRequest request);

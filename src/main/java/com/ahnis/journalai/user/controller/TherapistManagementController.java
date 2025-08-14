@@ -3,7 +3,7 @@ package com.ahnis.journalai.user.controller;
 import com.ahnis.journalai.common.dto.ApiResponse;
 import com.ahnis.journalai.user.dto.request.TherapistUpdateRequest;
 import com.ahnis.journalai.user.dto.response.TherapistClientResponse;
-import com.ahnis.journalai.user.dto.response.TherapistPersonalResponse;
+import com.ahnis.journalai.user.dto.response.TherapistProfileResponse;
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.service.TherapistService;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ public class TherapistManagementController {
     private final TherapistService therapistService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<TherapistPersonalResponse>> getTherapistProfile(
+    public ResponseEntity<ApiResponse<TherapistProfileResponse>> getTherapistProfile(
             @AuthenticationPrincipal Therapist therapist
     ) {
         var profile = therapistService.getProfile(therapist.getId());
