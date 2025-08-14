@@ -21,6 +21,9 @@ public interface TherapistService {
     @Transactional
     void subscribe(String userId, String therapistId);
 
+    @Transactional
+    void unsubscribe(String userId, String therapistId);
+
     TherapistProfileResponse getProfile(String id);
 
     @Transactional

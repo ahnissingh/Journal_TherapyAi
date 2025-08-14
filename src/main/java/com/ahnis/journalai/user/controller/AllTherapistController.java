@@ -46,4 +46,13 @@ public class AllTherapistController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(HttpStatus.CREATED, "Subscription successful", null));
     }
+    @PostMapping("/{therapistId}/unsubscribe")
+    public ResponseEntity<ApiResponse<Void>> unscribe(
+            @PathVariable String therapistId,
+            @AuthenticationPrincipal User user
+    ) {
+        therapistServiceImpl.unsubscribe(user.getId(), therapistId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(HttpStatus.CREATED, "Unsubscribe successful", null));
+    }
 }

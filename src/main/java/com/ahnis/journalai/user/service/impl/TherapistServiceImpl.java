@@ -37,10 +37,7 @@ public class TherapistServiceImpl implements TherapistService {
     private final TherapistMapper therapistMapper;
 
     @Override
-    public List<TherapistResponse> search(
-            String specialty,
-            String username
-    ) {
+    public List<TherapistResponse> search(String specialty, String username) {
         var criteria = new Criteria();
         if (specialty != null)
             criteria.and("specialties").regex(specialty, "i");
@@ -54,7 +51,6 @@ public class TherapistServiceImpl implements TherapistService {
                 .map(therapistMapper::toResponse)
                 .toList();
     }
-
 
     @Override
     public Page<TherapistResponse> getAllTherapists(int page, int size) {
@@ -91,6 +87,26 @@ public class TherapistServiceImpl implements TherapistService {
         // notificationService.sendSubscriptionNotification(therapistId, userId);
     }
 
+    @Override
+    public void unsubscribe(String userId, String therapistId) {
+        // Step 1: Remove therapist from user if currently subscribed to this therapist
+        var userQuery = new Query(Criteria.where("_id").is(userId)
+                .and("therapistId").is(therapistId));
+        var userUpdate = new Update()
+                .unset("therapistId")
+                .unset("subscribedAt");
+        var userResult = mongoTemplate.updateFirst(userQuery, userUpdate, User.class);
+        if (userResult.getMatchedCount() == 0) {
+            throw new ConflictException("User is not subscribed to this therapist");
+        }
+        // Step 2: Remove userId from therapist's client list
+        var therapistQuery = new Query(Criteria.where("_id").is(therapistId));
+        var therapistUpdate = new Update().pull("clientUserId", userId);
+        mongoTemplate.updateFirst(therapistQuery, therapistUpdate, Therapist.class);
+
+        //Step 3 Optional Notification
+        // notificationService.sendUnsubscribeNotification(therapistId, userId);
+    }
 
     @Override
     public TherapistProfileResponse getProfile(String id) {
