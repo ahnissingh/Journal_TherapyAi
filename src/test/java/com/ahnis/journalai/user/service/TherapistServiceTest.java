@@ -47,7 +47,7 @@ class TherapistServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private TherapistService therapistService;
+    private TherapistService therapistServiceImpl;
 
     private Therapist testTherapist;
     private User testUser;
@@ -108,7 +108,7 @@ class TherapistServiceTest {
         when(mongoTemplate.find(any(Query.class), eq(Therapist.class))).thenReturn(List.of(testTherapist));
 
         // When
-        List<TherapistResponse> result = therapistService.search(specialty, username);
+        List<TherapistResponse> result = therapistServiceImpl.search(specialty, username);
 
         // Then
         assertNotNull(result);
@@ -129,7 +129,7 @@ class TherapistServiceTest {
         when(therapistRepository.findAll(any(Pageable.class))).thenReturn(therapistPage);
 
         // When
-        Page<TherapistResponse> result = therapistService.getAllTherapists(page, size);
+        Page<TherapistResponse> result = therapistServiceImpl.getAllTherapists(page, size);
 
         // Then
         assertNotNull(result);
@@ -149,7 +149,7 @@ class TherapistServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
         // When
-        therapistService.subscribe(userId, therapistId);
+        therapistServiceImpl.subscribe(userId, therapistId);
 
         // Then
         verify(therapistRepository).findById(therapistId);
@@ -173,7 +173,7 @@ class TherapistServiceTest {
 
         // When/Then
         assertThrows(UserNotFoundException.class, () ->
-            therapistService.subscribe(userId, nonExistentTherapistId)
+            therapistServiceImpl.subscribe(userId, nonExistentTherapistId)
         );
         verify(therapistRepository).findById(nonExistentTherapistId);
         verify(userRepository, never()).findById(anyString());
@@ -193,7 +193,7 @@ class TherapistServiceTest {
 
         // When/Then
         assertThrows(UserNotFoundException.class, () ->
-            therapistService.subscribe(nonExistentUserId, therapistId)
+            therapistServiceImpl.subscribe(nonExistentUserId, therapistId)
         );
         verify(therapistRepository).findById(therapistId);
         verify(userRepository).findById(nonExistentUserId);
@@ -218,7 +218,7 @@ class TherapistServiceTest {
 
         // When/Then
         assertThrows(ConflictException.class, () ->
-            therapistService.subscribe(userId, therapistId)
+            therapistServiceImpl.subscribe(userId, therapistId)
         );
         verify(therapistRepository).findById(therapistId);
         verify(userRepository).findById(userId);
@@ -234,7 +234,7 @@ class TherapistServiceTest {
         when(therapistRepository.findById(therapistId)).thenReturn(Optional.of(testTherapist));
 
         // When
-        TherapistPersonalResponse result = therapistService.getProfile(therapistId);
+        TherapistPersonalResponse result = therapistServiceImpl.getProfile(therapistId);
 
         // Then
         assertNotNull(result);
@@ -251,7 +251,7 @@ class TherapistServiceTest {
 
         // When/Then
         assertThrows(UserNotFoundException.class, () ->
-            therapistService.getProfile(nonExistentTherapistId)
+            therapistServiceImpl.getProfile(nonExistentTherapistId)
         );
         verify(therapistRepository).findById(nonExistentTherapistId);
     }
@@ -264,7 +264,7 @@ class TherapistServiceTest {
         when(therapistRepository.findById(therapistId)).thenReturn(Optional.of(testTherapist));
 
         // When
-        therapistService.updateProfile(therapistId, testTherapistUpdateRequest);
+        therapistServiceImpl.updateProfile(therapistId, testTherapistUpdateRequest);
 
         // Then
         verify(therapistRepository).findById(therapistId);
@@ -286,7 +286,7 @@ class TherapistServiceTest {
 
         // When/Then
         assertThrows(UserNotFoundException.class, () ->
-            therapistService.updateProfile(nonExistentTherapistId, testTherapistUpdateRequest)
+            therapistServiceImpl.updateProfile(nonExistentTherapistId, testTherapistUpdateRequest)
         );
         verify(therapistRepository).findById(nonExistentTherapistId);
         verify(therapistRepository, never()).save(any(Therapist.class));
@@ -305,7 +305,7 @@ class TherapistServiceTest {
         when(userRepository.findAllByIdIn(clientUserIds, pageable)).thenReturn(clientsPage);
 
         // When
-        Page<TherapistClientResponse> result = therapistService.getClients(clientUserIds, page, size);
+        Page<TherapistClientResponse> result = therapistServiceImpl.getClients(clientUserIds, page, size);
 
         // Then
         assertNotNull(result);

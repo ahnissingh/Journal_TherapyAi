@@ -42,7 +42,7 @@ class PasswordResetServiceTest {
     private NotificationService notificationService;
 
     @InjectMocks
-    private PasswordResetService passwordResetService;
+    private PasswordResetService passwordResetServiceImpl;
 
     @Captor
     private ArgumentCaptor<PasswordResetToken> tokenCaptor;
@@ -75,7 +75,7 @@ class PasswordResetServiceTest {
         when(passwordResetTokenRepository.save(any(PasswordResetToken.class))).thenReturn(testToken);
 
         // When
-        passwordResetService.sendPasswordResetEmail(testUser.getEmail());
+        passwordResetServiceImpl.sendPasswordResetEmail(testUser.getEmail());
 
         // Then
         verify(userRepository).findByUsernameOrEmail(testUser.getEmail());
@@ -98,7 +98,7 @@ class PasswordResetServiceTest {
 
         // When/Then
         assertThrows(RuntimeException.class, () ->
-            passwordResetService.sendPasswordResetEmail(nonExistentEmail)
+            passwordResetServiceImpl.sendPasswordResetEmail(nonExistentEmail)
         );
         verify(userRepository).findByUsernameOrEmail(nonExistentEmail);
         verify(passwordResetTokenRepository, never()).save(any(PasswordResetToken.class));
@@ -118,7 +118,7 @@ class PasswordResetServiceTest {
         when(userRepository.updatePassword(testToken.getUserId(), encodedPassword)).thenReturn(1L);
 
         // When
-        passwordResetService.resetPassword(testToken.getToken(), newPassword);
+        passwordResetServiceImpl.resetPassword(testToken.getToken(), newPassword);
 
         // Then
         verify(passwordResetTokenRepository).findByToken(testToken.getToken());
@@ -139,7 +139,7 @@ class PasswordResetServiceTest {
 
         // When/Then
         assertThrows(RuntimeException.class, () ->
-            passwordResetService.resetPassword(nonExistentToken, newPassword)
+            passwordResetServiceImpl.resetPassword(nonExistentToken, newPassword)
         );
         verify(passwordResetTokenRepository).findByToken(nonExistentToken);
         verify(userRepository, never()).existsById(anyString());
@@ -164,7 +164,7 @@ class PasswordResetServiceTest {
 
         // When/Then
         assertThrows(RuntimeException.class, () ->
-            passwordResetService.resetPassword(expiredToken.getToken(), newPassword)
+            passwordResetServiceImpl.resetPassword(expiredToken.getToken(), newPassword)
         );
         verify(passwordResetTokenRepository).findByToken(expiredToken.getToken());
         verify(userRepository, never()).existsById(anyString());
@@ -184,7 +184,7 @@ class PasswordResetServiceTest {
 
         // When/Then
         assertThrows(UserNotFoundException.class, () ->
-            passwordResetService.resetPassword(testToken.getToken(), newPassword)
+            passwordResetServiceImpl.resetPassword(testToken.getToken(), newPassword)
         );
         verify(passwordResetTokenRepository).findByToken(testToken.getToken());
         verify(userRepository).existsById(testToken.getUserId());
@@ -207,7 +207,7 @@ class PasswordResetServiceTest {
 
         // When/Then
         assertThrows(RuntimeException.class, () ->
-            passwordResetService.resetPassword(testToken.getToken(), newPassword)
+            passwordResetServiceImpl.resetPassword(testToken.getToken(), newPassword)
         );
         verify(passwordResetTokenRepository).findByToken(testToken.getToken());
         verify(userRepository).existsById(testToken.getUserId());

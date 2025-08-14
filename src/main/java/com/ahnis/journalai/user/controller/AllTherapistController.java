@@ -17,14 +17,14 @@ import java.util.List;
 @RequestMapping("/api/v1/therapists")
 @RequiredArgsConstructor
 public class AllTherapistController {
-    private final TherapistService therapistService;
+    private final TherapistService therapistServiceImpl;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TherapistResponse>>> getAllTherapists(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        var therapists = therapistService.getAllTherapists(page, size);
+        var therapists = therapistServiceImpl.getAllTherapists(page, size);
         return ResponseEntity.ok(ApiResponse.success(therapists));
     }
 
@@ -33,7 +33,7 @@ public class AllTherapistController {
             @RequestParam(required = false) String specialty,
             @RequestParam(required = false) String username
     ) {
-        var results = therapistService.search(specialty, username);
+        var results = therapistServiceImpl.search(specialty, username);
         return ResponseEntity.ok(ApiResponse.success(results));
     }
 
@@ -42,7 +42,7 @@ public class AllTherapistController {
             @PathVariable String therapistId,
             @AuthenticationPrincipal User user
     ) {
-        therapistService.subscribe(user.getId(), therapistId);
+        therapistServiceImpl.subscribe(user.getId(), therapistId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(HttpStatus.CREATED, "Subscription successful", null));
     }

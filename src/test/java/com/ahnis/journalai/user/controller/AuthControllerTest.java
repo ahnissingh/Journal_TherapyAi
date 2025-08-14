@@ -1,6 +1,5 @@
 package com.ahnis.journalai.user.controller;
 
-import com.ahnis.journalai.config.TestSecurityConfig;
 import com.ahnis.journalai.user.dto.request.AuthRequest;
 import com.ahnis.journalai.user.dto.request.PreferencesRequest;
 import com.ahnis.journalai.user.dto.request.TherapistRegistrationRequest;
@@ -21,9 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -47,7 +43,7 @@ class AuthControllerTest {
     private AuthService authService;
 
     @Mock
-    private PasswordResetService passwordResetService;
+    private PasswordResetService passwordResetServiceImpl;
 
     @InjectMocks
     private AuthController authController;
@@ -158,7 +154,7 @@ class AuthControllerTest {
     void forgotPassword_ShouldReturnSuccessResponse() throws Exception {
         // Given
         String email = "test@example.com";
-        doNothing().when(passwordResetService).sendPasswordResetEmail(anyString());
+        doNothing().when(passwordResetServiceImpl).sendPasswordResetEmail(anyString());
 
         // When/Then
         mockMvc.perform(post("/api/v1/auth/forgot-password")
@@ -173,7 +169,7 @@ class AuthControllerTest {
         // Given
         String token = "reset-token-123";
         String newPassword = "newPassword123";
-        doNothing().when(passwordResetService).resetPassword(anyString(), anyString());
+        doNothing().when(passwordResetServiceImpl).resetPassword(anyString(), anyString());
 
         // When/Then
         mockMvc.perform(post("/api/v1/auth/reset-password")

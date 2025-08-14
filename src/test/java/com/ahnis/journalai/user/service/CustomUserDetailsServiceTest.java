@@ -1,5 +1,6 @@
 package com.ahnis.journalai.user.service;
 
+import com.ahnis.journalai.common.security.CustomUserDetailsService;
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.enums.Language;

@@ -1,5 +1,5 @@
 
-package com.ahnis.journalai.user.service;
+package com.ahnis.journalai.common.security;
 
 import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;

@@ -17,7 +17,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,8 +25,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +41,7 @@ class AllTherapistControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private TherapistService therapistService;
+    private TherapistService therapistServiceImpl;
 
     @InjectMocks
     private AllTherapistController allTherapistController;
@@ -135,7 +132,7 @@ class AllTherapistControllerTest {
     @DisplayName("Should get all therapists successfully")
     void getAllTherapists_ShouldReturnPageOfTherapists() throws Exception {
         // Given
-        when(therapistService.getAllTherapists(anyInt(), anyInt())).thenReturn(therapistResponsePage);
+        when(therapistServiceImpl.getAllTherapists(anyInt(), anyInt())).thenReturn(therapistResponsePage);
 
         // When/Then
         mockMvc.perform(get("/api/v1/therapists")
@@ -156,7 +153,7 @@ class AllTherapistControllerTest {
     @DisplayName("Should search therapists successfully")
     void searchTherapists_ShouldReturnListOfTherapists() throws Exception {
         // Given
-        when(therapistService.search(anyString(), anyString())).thenReturn(therapistResponseList);
+        when(therapistServiceImpl.search(anyString(), anyString())).thenReturn(therapistResponseList);
 
         // When/Then
         mockMvc.perform(get("/api/v1/therapists/search")
@@ -178,7 +175,7 @@ class AllTherapistControllerTest {
     void subscribe_ShouldReturnSuccessResponse() throws Exception {
         // Given
         String therapistId = "therapist123";
-        doNothing().when(therapistService).subscribe(anyString(), anyString());
+        doNothing().when(therapistServiceImpl).subscribe(anyString(), anyString());
 
         // When/Then
         mockMvc.perform(post("/api/v1/therapists/{therapistId}/subscribe", therapistId))

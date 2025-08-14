@@ -46,7 +46,7 @@ class TherapistManagementControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private TherapistService therapistService;
+    private TherapistService therapistServiceImpl;
 
     @InjectMocks
     private TherapistManagementController therapistManagementController;
@@ -150,7 +150,7 @@ class TherapistManagementControllerTest {
     @DisplayName("Should get therapist profile successfully")
     void getTherapistProfile_ShouldReturnTherapistPersonalResponse() throws Exception {
         // Given
-        when(therapistService.getProfile(anyString())).thenReturn(therapistPersonalResponse);
+        when(therapistServiceImpl.getProfile(anyString())).thenReturn(therapistPersonalResponse);
 
         // When/Then
         mockMvc.perform(get("/api/v1/therapists/me"))
@@ -166,7 +166,7 @@ class TherapistManagementControllerTest {
     @DisplayName("Should update therapist profile successfully")
     void updateProfile_ShouldReturnSuccessResponse() throws Exception {
         // Given
-        doNothing().when(therapistService).updateProfile(anyString(), any(TherapistUpdateRequest.class));
+        doNothing().when(therapistServiceImpl).updateProfile(anyString(), any(TherapistUpdateRequest.class));
 
         // When/Then
         mockMvc.perform(patch("/api/v1/therapists/me")
@@ -181,7 +181,7 @@ class TherapistManagementControllerTest {
     @DisplayName("Should get therapist clients successfully")
     void getMyClients_ShouldReturnPageOfClients() throws Exception {
         // Given
-        when(therapistService.getClients(anySet(), anyInt(), anyInt())).thenReturn(therapistClientResponsePage);
+        when(therapistServiceImpl.getClients(anySet(), anyInt(), anyInt())).thenReturn(therapistClientResponsePage);
 
         // When/Then
         mockMvc.perform(get("/api/v1/therapists/me/clients")
