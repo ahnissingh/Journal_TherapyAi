@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,26 +63,55 @@ public class TherapistServiceImpl implements TherapistService {
 
     }
 
-    @Transactional @Override
+//    @Transactional
+//    @Override
+//    public void subscribe(String userId, String therapistId) {
+
+//        var therapist = therapistRepository.findById(therapistId)
+//                .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
+//
+//        var user = userRepository.findById(userId)
+//                .orElseThrow(() -> new UserNotFoundException("User not found", userId));
+//        if (user.getTherapistId() != null) {
+//            throw new ConflictException("User already subscribed to therapist,Unsubscribe them first");
+//        }
+//
+//        // Updating both sides of relationship ie one to many
+//        user.setTherapistId(therapistId);1
+//        user.setSubscribedAt(Instant.now());
+//        therapist.getClientUserId().add(userId);+1
+//
+//        //Todo refactor to atomic update
+//        userRepository.save(user);
+//        therapistRepository.save(therapist);
+//
+//        //notificationService.sendSubscriptionNotification(therapist, user);
+//    }
+    @Transactional
+    @Override
     public void subscribe(String userId, String therapistId) {
-        var therapist = therapistRepository.findById(therapistId)
-                .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found", userId));
-        if (user.getTherapistId() != null) {
-            throw new ConflictException("User already subscribed to therapist,Unsubscribe them first");
+        // Step 1: Atomically update user only if not already subscribed
+        Query userQuery = new Query(Criteria.where("_id").is(userId)
+                .and("therapistId").exists(false));
+
+        Update userUpdate = new Update()
+                .set("therapistId", therapistId)
+                .set("subscribedAt", Instant.now());
+
+        var userResult = mongoTemplate.updateFirst(userQuery, userUpdate, User.class);
+
+        if (userResult.getMatchedCount() == 0) {
+            throw new ConflictException("User already subscribed to therapist, unsubscribe them first");
         }
 
-        // Updating both sides of relationship ie one to many
-        user.setTherapistId(therapistId);
-        user.setSubscribedAt(Instant.now());
-        therapist.getClientUserId().add(userId);
+        // Step 2: Atomically add userId to therapist's client list
+        Query therapistQuery = new Query(Criteria.where("_id").is(therapistId));
+        Update therapistUpdate = new Update().addToSet("clientUserId", userId);
 
-        //Todo refactor to atomic update
-        userRepository.save(user);
-        therapistRepository.save(therapist);
+        mongoTemplate.updateFirst(therapistQuery, therapistUpdate, Therapist.class);
 
-        //notificationService.sendSubscriptionNotification(therapist, user);
+        // Step 3: Optional notification
+        // notificationService.sendSubscriptionNotification(therapistId, userId);
     }
 
 
@@ -106,7 +136,8 @@ public class TherapistServiceImpl implements TherapistService {
                 .orElseThrow(() -> new UserNotFoundException("Therapist not found", id));
     }
 
-    @Transactional @Override
+    @Transactional
+    @Override
     public void updateProfile(String therapistId, TherapistUpdateRequest request) {
         Therapist therapist = therapistRepository.findById(therapistId)
                 .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
@@ -130,7 +161,6 @@ public class TherapistServiceImpl implements TherapistService {
         // Map the page of users to a page of TherapistClientResponse
         return clientsPage.map(TherapistClientResponse::fromUser);
     }
-
 
 
 }
