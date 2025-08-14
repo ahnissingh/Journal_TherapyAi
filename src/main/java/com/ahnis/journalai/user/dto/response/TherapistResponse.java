@@ -10,7 +10,7 @@ public record TherapistResponse(
         String firstName,
         String lastName,
         Set<String> specialties,
-        Set<Language> spokenLanguages,
+        Set<Language> languages,
         int yearsOfExperience,
         String bio,
         String profilePictureUrl

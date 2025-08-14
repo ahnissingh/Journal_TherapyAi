@@ -8,6 +8,7 @@ import com.ahnis.journalai.user.entity.Therapist;
 import com.ahnis.journalai.user.entity.User;
 import com.ahnis.journalai.user.exception.ConflictException;
 import com.ahnis.journalai.user.exception.UserNotFoundException;
+import com.ahnis.journalai.user.mapper.TherapistMapper;
 import com.ahnis.journalai.user.repository.TherapistRepository;
 import com.ahnis.journalai.user.repository.UserRepository;
 import com.ahnis.journalai.user.service.TherapistService;
@@ -33,6 +34,7 @@ public class TherapistServiceImpl implements TherapistService {
     private final TherapistRepository therapistRepository;
     private final MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
+    private final TherapistMapper therapistMapper;
 
 
     @Override
@@ -50,7 +52,7 @@ public class TherapistServiceImpl implements TherapistService {
 
         List<Therapist> therapists = mongoTemplate.find(query, Therapist.class);
         return therapists.stream()
-                .map(this::mapToResponse)
+                .map(therapistMapper::toResponse)
                 .toList();
     }
 
@@ -59,34 +61,10 @@ public class TherapistServiceImpl implements TherapistService {
     public Page<TherapistResponse> getAllTherapists(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return therapistRepository.findAll(pageable)
-                .map(this::mapToResponse);
+                .map(therapistMapper::toResponse);
 
     }
 
-//    @Transactional
-//    @Override
-//    public void subscribe(String userId, String therapistId) {
-
-//        var therapist = therapistRepository.findById(therapistId)
-//                .orElseThrow(() -> new UserNotFoundException("Therapist not found", therapistId));
-//
-//        var user = userRepository.findById(userId)
-//                .orElseThrow(() -> new UserNotFoundException("User not found", userId));
-//        if (user.getTherapistId() != null) {
-//            throw new ConflictException("User already subscribed to therapist,Unsubscribe them first");
-//        }
-//
-//        // Updating both sides of relationship ie one to many
-//        user.setTherapistId(therapistId);1
-//        user.setSubscribedAt(Instant.now());
-//        therapist.getClientUserId().add(userId);+1
-//
-//        //Todo refactor to atomic update
-//        userRepository.save(user);
-//        therapistRepository.save(therapist);
-//
-//        //notificationService.sendSubscriptionNotification(therapist, user);
-//    }
     @Transactional
     @Override
     public void subscribe(String userId, String therapistId) {
@@ -114,20 +92,6 @@ public class TherapistServiceImpl implements TherapistService {
         // notificationService.sendSubscriptionNotification(therapistId, userId);
     }
 
-
-    private TherapistResponse mapToResponse(Therapist therapist) {
-        return new TherapistResponse(
-                therapist.getId(),
-                therapist.getUsername(),
-                therapist.getFirstName(),
-                therapist.getLastName(),
-                therapist.getSpecialties(),
-                therapist.getLanguages(),
-                therapist.getYearsOfExperience(),
-                therapist.getBio(),
-                therapist.getProfilePictureUrl()
-        );
-    }
 
     @Override
     public TherapistPersonalResponse getProfile(String id) {
